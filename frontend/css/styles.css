@@ -1,0 +1,38 @@
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+}
+
+.login-container {
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+}
+
+input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  background: #333;
+  color: white;
+  padding: 10px;
+}
+
+.container {
+  padding: 20px;
+}

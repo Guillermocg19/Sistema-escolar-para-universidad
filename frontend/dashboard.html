@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="navbar">
+  <h2>Dashboard</h2>
+  <button onclick="logout()">Cerrar sesión</button>
+</div>
+
+<div class="container">
+  <h3>Usuarios</h3>
+  <button onclick="loadUsuarios()">Cargar Usuarios</button>
+
+  <ul id="listaUsuarios"></ul>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "sistema-escolar-para-universidad",
+  "version": "1.0.0",
+  "description": "Sistema de información institucional desarrollado para centralizar y optimizar los procesos académicos y administrativos de una universidad. Está orientado a tres tipos de usuarios: estudiantes, profesores y personal administrativo, cada uno con acceso a las funcionalidades correspondientes a su rol. El sistema busca facilitar tareas como la consulta de calificaciones, gestión de grupos, captura de información académica, generación de reportes y administración general del plantel, todo desde una sola plataforma accesible y organizada. Este proyecto tiene como objetivo modernizar y simplificar la experiencia escolar tanto para alumnos como para el personal docente y administrativo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Guillermocg19/Sistema-escolar-para-universidad.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Guillermocg19/Sistema-escolar-para-universidad/issues"
+  },
+  "homepage": "https://github.com/Guillermocg19/Sistema-escolar-para-universidad#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Docente</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Portal Docente</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <h3>Bienvenido al portal docente</h3>
+  <p>Administra tus grupos, captura calificaciones y registra asistencias.<br>
+  <em>Módulos disponibles próximamente.</em></p>
+</div>
+
+<script src="js/dashboard.js"></script>
+<script>
+  const sesion = checkSesion();
+  if (sesion && sesion.rol !== 'docente') window.location.href = 'login.html';
+  renderNavbar('Portal Docente', sesion?.rol);
+</script>
+</body>
+</html>

@@ -1,38 +1,149 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  font-family: Arial;
-  background: #f4f4f4;
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
 }
 
+/* ── LOGIN ── */
 .login-container {
-  width: 300px;
-  margin: 100px auto;
-  padding: 20px;
+  width: 340px;
+  margin: 80px auto;
+  padding: 36px 30px;
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
-input {
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
+.login-logo {
+  font-size: 48px;
+  margin-bottom: 10px;
 }
 
-button {
+.login-container h2 {
+  color: #1a73e8;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.login-container input {
   width: 100%;
-  padding: 10px;
-  background: #007bff;
+  margin: 7px 0;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.login-container button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  background: #1a73e8;
   color: white;
   border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.login-container button:hover {
+  background: #1558c0;
+}
+
+#error {
+  margin-top: 14px;
+  color: #d32f2f;
+  font-size: 13px;
+}
+
+/* ── NAVBAR ── */
 .navbar {
   display: flex;
   justify-content: space-between;
-  background: #333;
+  align-items: center;
+  background: #1a73e8;
   color: white;
-  padding: 10px;
+  padding: 12px 24px;
 }
 
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar h2 { font-size: 18px; }
+
+.user-info {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.navbar button {
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.navbar button:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* ── ROL BADGE ── */
+.rol-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.rol-alumno          { background: #e3f2fd; color: #1565c0; }
+.rol-docente         { background: #e8f5e9; color: #2e7d32; }
+.rol-administrativo  { background: #fff3e0; color: #e65100; }
+
+/* ── CONTENIDO DASHBOARD ── */
 .container {
-  padding: 20px;
+  padding: 30px;
+}
+
+.container h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.container p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
 }

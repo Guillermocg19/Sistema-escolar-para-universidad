@@ -1,25 +1,42 @@
 async function login() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const errorEl  = document.getElementById('error');
 
-  const response = await fetch(`${API_URL}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ username, password })
-  });
+  errorEl.textContent = '';
 
-  if (response.ok) {
-    const data = await response.json();
-    localStorage.setItem("token", data.token);
-    window.location.href = "dashboard.html";
-  } else {
-    document.getElementById("error").innerText = "Credenciales incorrectas";
+  if (!username || !password) {
+    errorEl.textContent = 'Por favor ingresa usuario y contraseña.';
+    return;
   }
-}
 
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "index.html";
+  try {
+    const data = await loginRequest(username, password);
+
+    if (data.success) {
+      sessionStorage.setItem('usuario', data.usuario);
+      sessionStorage.setItem('rol',     data.rol);
+      sessionStorage.setItem('id',      data.id);
+
+      switch (data.rol) {
+        case 'alumno':
+          window.location.href = 'dashboard-alumno.html';
+          break;
+        case 'administrativo':
+          window.location.href = 'dashboard-administrativo.html';
+          break;
+        case 'docente':
+          window.location.href = 'dashboard-docente.html';
+          break;
+        default:
+          errorEl.textContent = 'Rol no reconocido. Contacta al administrador.';
+      }
+    } else {
+      errorEl.textContent = 'Usuario o contraseña incorrectos.';
+    }
+
+  } catch (err) {
+    console.error(err);
+    errorEl.textContent = 'Error de conexión con el servidor.';
+  }
 }

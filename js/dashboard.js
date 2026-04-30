@@ -1,18 +1,25 @@
-async function loadUsuarios() {
-  const response = await fetch(`${API_URL}/usuarios`, {
-    headers: {
-      "Authorization": "Bearer " + getToken()
-    }
-  });
+function checkSesion() {
+  const rol     = sessionStorage.getItem('rol');
+  const usuario = sessionStorage.getItem('usuario');
 
-  const data = await response.json();
+  if (!rol || !usuario) {
+    window.location.href = 'login.html';
+    return null;
+  }
+  return { rol, usuario };
+}
 
-  const lista = document.getElementById("listaUsuarios");
-  lista.innerHTML = "";
+function renderNavbar(titulo, rol) {
+  const usuario = sessionStorage.getItem('usuario');
+  document.getElementById('navbar-titulo').textContent  = titulo;
+  document.getElementById('navbar-usuario').textContent = '👤 ' + usuario;
 
-  data.forEach(u => {
-    const li = document.createElement("li");
-    li.innerText = u.username;
-    lista.appendChild(li);
-  });
+  const badge = document.getElementById('navbar-rol');
+  badge.textContent = rol;
+  badge.className   = 'rol-badge rol-' + rol;
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
 }

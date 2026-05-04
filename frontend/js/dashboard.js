@@ -1,25 +1,37 @@
-function checkSesion() {
-  const rol     = sessionStorage.getItem('rol');
-  const usuario = sessionStorage.getItem('usuario');
+window.onload = function () {
+  const token = getToken();
+  const user = getUsuario();
 
-  if (!rol || !usuario) {
-    window.location.href = 'login.html';
-    return null;
+  if (!token) {
+    window.location.href = "index.html";
+    return;
   }
-  return { rol, usuario };
-}
 
-function renderNavbar(titulo, rol) {
-  const usuario = sessionStorage.getItem('usuario');
-  document.getElementById('navbar-titulo').textContent  = titulo;
-  document.getElementById('navbar-usuario').textContent = '👤 ' + usuario;
+  if (user) {
+    const bienvenida = document.getElementById("bienvenida");
+    if (bienvenida) {
+      bienvenida.innerText = `Bienvenido, ${user.nombre || user.usuario}`;
+    }
+  }
+};
 
-  const badge = document.getElementById('navbar-rol');
-  badge.textContent = rol;
-  badge.className   = 'rol-badge rol-' + rol;
-}
+async function loadUsuarios() {
+  try {
+    const response = await fetch(`${API_URL}/usuarios`, {
+      headers: { "Authorization": "Bearer " + getToken() }
+    });
 
-function logout() {
-  sessionStorage.clear();
-  window.location.href = 'login.html';
+    const data = await response.json();
+    const lista = document.getElementById("listaUsuarios");
+    lista.innerHTML = "";
+
+    data.forEach(u => {
+      const li = document.createElement("li");
+      li.innerText = `${u.nombre || u.usuario} (${u.rol})`;
+      lista.appendChild(li);
+    });
+
+  } catch (error) {
+    alert("No se pudo conectar con el servidor");
+  }
 }

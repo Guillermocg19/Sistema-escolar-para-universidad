@@ -2,21 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Panel Principal - SII</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
 <div class="navbar">
-  <h2>Dashboard</h2>
-  <button onclick="logout()">Cerrar sesión</button>
+  <h2>Sistema de Informacion Institucional</h2>
+  <div style="display:flex; align-items:center; gap:15px;">
+    <span id="bienvenida" style="color:white;"></span>
+    <button onclick="logout()">Cerrar sesion</button>
+  </div>
 </div>
 
 <div class="container">
-  <h3>Usuarios</h3>
+  <h3>Usuarios registrados en la base de datos</h3>
   <button onclick="loadUsuarios()">Cargar Usuarios</button>
-
-  <ul id="listaUsuarios"></ul>
+  <ul id="listaUsuarios" style="margin-top:15px;"></ul>
 </div>
 
 <script src="js/api.js"></script>

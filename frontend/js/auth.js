@@ -1,42 +1,39 @@
 async function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const errorEl  = document.getElementById('error');
-
-  errorEl.textContent = '';
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorEl = document.getElementById("error");
 
   if (!username || !password) {
-    errorEl.textContent = 'Por favor ingresa usuario y contraseña.';
+    errorEl.innerText = "Ingresa tu usuario y contrasena";
     return;
   }
 
+  errorEl.innerText = "";
+
   try {
-    const data = await loginRequest(username, password);
+    const response = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
 
-    if (data.success) {
-      sessionStorage.setItem('usuario', data.usuario);
-      sessionStorage.setItem('rol',     data.rol);
-      sessionStorage.setItem('id',      data.id);
+    const data = await response.json();
 
-      switch (data.rol) {
-        case 'alumno':
-          window.location.href = 'dashboard-alumno.html';
-          break;
-        case 'administrativo':
-          window.location.href = 'dashboard-administrativo.html';
-          break;
-        case 'docente':
-          window.location.href = 'dashboard-docente.html';
-          break;
-        default:
-          errorEl.textContent = 'Rol no reconocido. Contacta al administrador.';
-      }
+    if (response.ok && data.success) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.location.href = "dashboard.html";
     } else {
-      errorEl.textContent = 'Usuario o contraseña incorrectos.';
+      errorEl.innerText = data.message || "Usuario o contrasena incorrectos";
     }
 
-  } catch (err) {
-    console.error(err);
-    errorEl.textContent = 'Error de conexión con el servidor.';
+  } catch (error) {
+    errorEl.innerText = "No se pudo conectar con el servidor";
   }
+}
+
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
 }

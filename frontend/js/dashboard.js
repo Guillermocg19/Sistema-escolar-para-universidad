@@ -1,37 +1,27 @@
-window.onload = function () {
-  const token = getToken();
-  const user = getUsuario();
-
-  if (!token) {
-    window.location.href = "index.html";
-    return;
+function checkSesion() {
+  const token = localStorage.getItem('token');
+  const user  = localStorage.getItem('user');
+  if (!token || !user) {
+    window.location.href = 'login.html';
+    return null;
   }
+  return JSON.parse(user);
+}
 
-  if (user) {
-    const bienvenida = document.getElementById("bienvenida");
-    if (bienvenida) {
-      bienvenida.innerText = `Bienvenido, ${user.nombre || user.usuario}`;
-    }
-  }
-};
+function renderNavbar(titulo) {
+  const user = checkSesion();
+  if (!user) return;
 
-async function loadUsuarios() {
-  try {
-    const response = await fetch(`${API_URL}/usuarios`, {
-      headers: { "Authorization": "Bearer " + getToken() }
-    });
+  document.getElementById('navbar-titulo').textContent  = titulo;
+  document.getElementById('navbar-usuario').textContent = '👤 ' + (user.nombre || user.usuario);
 
-    const data = await response.json();
-    const lista = document.getElementById("listaUsuarios");
-    lista.innerHTML = "";
+  const badge = document.getElementById('navbar-rol');
+  badge.textContent = user.rol;
+  badge.className   = 'rol-badge rol-' + user.rol;
+}
 
-    data.forEach(u => {
-      const li = document.createElement("li");
-      li.innerText = `${u.nombre || u.usuario} (${u.rol})`;
-      lista.appendChild(li);
-    });
-
-  } catch (error) {
-    alert("No se pudo conectar con el servidor");
-  }
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
 }

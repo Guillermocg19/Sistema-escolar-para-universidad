@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Usuarios</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Formulario -->
+  <div class="card">
+    <h3 id="form-titulo">Nuevo Usuario</h3>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <input type="text"     id="f-usuario"   placeholder="Usuario">
+      <input type="password" id="f-contrasena" placeholder="Contraseña">
+      <input type="text"     id="f-nombre"    placeholder="Nombre completo">
+      <select id="f-rol">
+        <option value="alumno">Alumno</option>
+        <option value="docente">Docente</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="guardarUsuario()">Guardar</button>
+      <button class="btn-secondary" onclick="limpiarFormUsuario()">Cancelar</button>
+    </div>
+    <p id="form-error" class="form-error"></p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <h3>Usuarios registrados</h3>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-usuarios"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-usuarios.js"></script>
+</body>
+</html>

@@ -32,7 +32,7 @@
 <script src="js/dashboard.js"></script>
 <script>
   const sesion = checkSesion();
-  if (sesion && sesion.rol !== 'administrativo') window.location.href = 'login.html';
+  if (sesion && sesion.rol !== 'admin') window.location.href = 'login.html';
   renderNavbar('Panel Administrativo', sesion?.rol);
 </script>
 </body>

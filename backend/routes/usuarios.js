@@ -13,7 +13,8 @@ router.get('/',     autorizar(['admin', 'docente']), async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor' });
+    console.error('Error al obtener usuarios:', error.message);
+    res.status(500).json({ message:error.message });
   }
 });
 

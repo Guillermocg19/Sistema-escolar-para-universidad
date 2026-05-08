@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Roles</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Roles</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <h3 id="form-titulo">Nuevo Rol</h3>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="f-nombre"      placeholder="Nombre del rol">
+      <input type="text" id="f-descripcion" placeholder="Descripción">
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary"   onclick="guardarRol()">Guardar</button>
+      <button class="btn-secondary" onclick="limpiarFormRol()">Cancelar</button>
+    </div>
+    <p id="form-error" class="form-error"></p>
+  </div>
+
+  <div class="card">
+    <h3>Roles del sistema</h3>
+    <table class="tabla">
+      <thead>
+        <tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="tabla-roles"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-roles.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Docentes</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Docentes</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3 id="form-titulo">Nuevo Docente</h3>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <input type="text"   id="f-numero"      placeholder="Número de empleado">
+      <input type="text"   id="f-nombre"      placeholder="Nombre(s)">
+      <input type="text"   id="f-apellidos"   placeholder="Apellidos">
+      <input type="email"  id="f-email"       placeholder="Correo electrónico">
+      <input type="text"   id="f-telefono"    placeholder="Teléfono">
+      <input type="text"   id="f-especialidad" placeholder="Especialidad">
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary"   onclick="guardarDocente()">Guardar</button>
+      <button class="btn-secondary" onclick="limpiarForm()">Cancelar</button>
+    </div>
+    <p id="form-error" class="form-error"></p>
+  </div>
+
+  <div class="card">
+    <h3>Docentes registrados</h3>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>No. Empleado</th><th>Nombre</th><th>Apellidos</th>
+          <th>Especialidad</th><th>Email</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-docentes"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-docentes.js"></script>
+</body>
+</html>

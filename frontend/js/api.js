@@ -162,3 +162,15 @@ async function apiGetGruposMateria(materia_id) {
   const r = await fetch(`${API_URL}/materias/${materia_id}/grupos`, { headers: authHeaders() });
   return r.json();
 }
+
+// ── PORTAL DOCENTE ──
+async function apiGetMisMateriasDocente(usuario_id) {
+  const r = await fetch(`${API_URL}/docentes/mis-materias/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}
+
+// ── PORTAL ALUMNO ──
+async function apiGetMisMateriasAlumno(usuario_id) {
+  const r = await fetch(`${API_URL}/alumnos/mis-materias/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}

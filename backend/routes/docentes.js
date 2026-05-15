@@ -119,4 +119,24 @@ router.delete('/:id', autorizar(['admin']), async (req, res) => {
   }
 });
 
+// Materias asignadas al docente por su usuario_id
+router.get('/mis-materias/:usuario_id', autorizar(['docente', 'admin']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT m.id, m.clave, m.nombre, m.creditos,
+              g.nombre AS grupo, g.grado, g.turno
+       FROM materia_grupo mg
+       JOIN materias m ON mg.materia_id = m.id
+       JOIN grupos   g ON mg.grupo_id   = g.id
+       JOIN docentes d ON mg.docente_id = d.id
+       WHERE d.usuario_id = $1 AND mg.activo = TRUE
+       ORDER BY m.nombre`,
+      [req.params.usuario_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

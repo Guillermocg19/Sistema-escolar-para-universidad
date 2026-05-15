@@ -121,4 +121,26 @@ router.delete('/:id', autorizar(['admin']), async (req, res) => {
   }
 });
 
+// Materias del alumno por su usuario_id
+router.get('/mis-materias/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT m.id, m.clave, m.nombre, m.creditos,
+              g.nombre AS grupo, g.grado, g.turno,
+              d.nombre AS docente_nombre, d.apellidos AS docente_apellidos
+       FROM alumnos a
+       JOIN grupos        g  ON a.grupo_id      = g.id
+       JOIN materia_grupo mg ON mg.grupo_id      = g.id AND mg.activo = TRUE
+       JOIN materias      m  ON mg.materia_id    = m.id
+       LEFT JOIN docentes d  ON mg.docente_id    = d.id
+       WHERE a.usuario_id = $1 AND a.activo = TRUE
+       ORDER BY m.nombre`,
+      [req.params.usuario_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

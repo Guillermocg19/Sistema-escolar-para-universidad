@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Portal Docente</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
 </head>
 <body>
 
@@ -19,16 +20,63 @@
 </div>
 
 <div class="container">
-  <h3>Bienvenido al portal docente</h3>
-  <p>Administra tus grupos, captura calificaciones y registra asistencias.<br>
-  <em>Módulos disponibles próximamente.</em></p>
+  <div class="card">
+    <h3>Mis materias asignadas</h3>
+    <p style="color:#666; margin-bottom:16px; font-size:13px;">
+      Estas son las materias y grupos que tienes asignados este ciclo.
+    </p>
+    <table class="tabla" id="tabla-materias">
+      <thead>
+        <tr>
+          <th>Clave</th>
+          <th>Materia</th>
+          <th>Créditos</th>
+          <th>Grupo</th>
+          <th>Grado</th>
+          <th>Turno</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-materias">
+        <tr><td colspan="6">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
+<script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
-  const sesion = checkSesion();
-  if (sesion && sesion.rol !== 'docente') window.location.href = 'login.html';
-  renderNavbar('Portal Docente', sesion?.rol);
+  window.onload = async () => {
+    const sesion = checkSesion();
+    if (!sesion || sesion.rol !== 'docente') {
+      window.location.href = 'login.html';
+      return;
+    }
+    renderNavbar('Portal Docente');
+
+    const tbody = document.getElementById('tbody-materias');
+    try {
+      const materias = await apiGetMisMateriasDocente(sesion.id);
+      tbody.innerHTML = '';
+      if (materias.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No tienes materias asignadas aún.</td></tr>';
+        return;
+      }
+      materias.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.clave}</td>
+          <td>${m.nombre}</td>
+          <td>${m.creditos}</td>
+          <td>${m.grupo}</td>
+          <td>${m.grado}°</td>
+          <td>${m.turno}</td>`;
+        tbody.appendChild(tr);
+      });
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>';
+    }
+  };
 </script>
 </body>
 </html>

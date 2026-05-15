@@ -2,26 +2,46 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Sistema Escolar</title>
+  <title>Iniciar Sesión</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/portales.css">
 </head>
 <body>
 
 <div class="login-container">
-  <div class="login-logo">🏫</div>
-  <h2>Sistema Escolar</h2>
-  <p class="login-subtitle">Instituto Tecnológico</p>
+  <a href="index.html" class="login-back">← Regresar</a>
+  <div class="login-logo" id="login-icon">🏫</div>
+  <h2 id="login-titulo">Sistema Escolar</h2>
+  <p class="login-subtitle" id="login-subtitulo">Instituto Tecnológico</p>
 
-  <input type="text" id="username" placeholder="Usuario">
-  <input type="password" id="password" placeholder="Contraseña">
+  <input type="text"     id="username" placeholder="Usuario" autocomplete="username">
+  <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
 
   <button onclick="login()">Iniciar Sesión</button>
-
   <p id="error"></p>
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<script>
+  // Personalizar según el portal seleccionado
+  const params  = new URLSearchParams(window.location.search);
+  const portal  = params.get('portal');
+  const iconEl  = document.getElementById('login-icon');
+  const titEl   = document.getElementById('login-titulo');
+  const subEl   = document.getElementById('login-subtitulo');
 
+  const portales = {
+    alumno:  { icon: '🎓', titulo: 'Portal Alumno',          sub: 'Ingresa con tu matrícula y contraseña' },
+    docente: { icon: '👨‍🏫', titulo: 'Portal Docente',         sub: 'Ingresa con tu número de empleado' },
+    admin:   { icon: '🏛️', titulo: 'Panel Administrativo',    sub: 'Acceso exclusivo para personal autorizado' }
+  };
+
+  if (portal && portales[portal]) {
+    iconEl.textContent = portales[portal].icon;
+    titEl.textContent  = portales[portal].titulo;
+    subEl.textContent  = portales[portal].sub;
+  }
+</script>
 </body>
 </html>

@@ -2,24 +2,50 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login - SII</title>
+  <title>Sistema Escolar — Instituto Tecnológico</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/portales.css">
 </head>
-<body>
+<body class="portales-body">
 
-<div class="login-container">
-  <h2>Sistema Escolar</h2>
+<div class="portales-wrapper">
 
-  <input type="text" id="username" placeholder="Usuario">
-  <input type="password" id="password" placeholder="Contraseña">
+  <div class="portales-header">
+    <div class="portales-logo">🏫</div>
+    <h1>Instituto Tecnológico</h1>
+    <p>Sistema Integral de Información Escolar</p>
+  </div>
 
-  <button onclick="login()">Iniciar Sesión</button>
+  <div class="portales-grid">
 
-  <p id="error"></p>
+    <a href="login.html?portal=alumno" class="portal-card portal-alumno">
+      <div class="portal-icon">🎓</div>
+      <h2>Alumnos</h2>
+      <p>Consulta tus materias, calificaciones y horarios</p>
+      <span class="portal-btn">Ingresar</span>
+    </a>
+
+    <a href="login.html?portal=docente" class="portal-card portal-docente">
+      <div class="portal-icon">👨‍🏫</div>
+      <h2>Docentes</h2>
+      <p>Administra tus grupos, materias y calificaciones</p>
+      <span class="portal-btn">Ingresar</span>
+    </a>
+
+    <a href="login.html?portal=admin" class="portal-card portal-admin">
+      <div class="portal-icon">🏛️</div>
+      <h2>Personal Administrativo</h2>
+      <p>Gestión de alumnos, docentes, materias y roles</p>
+      <span class="portal-btn">Ingresar</span>
+    </a>
+
+  </div>
+
+  <footer class="portales-footer">
+    Sistema Escolar &copy; 2026 — Instituto Tecnológico
+  </footer>
+
 </div>
-
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
 
 </body>
 </html>

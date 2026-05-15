@@ -1,0 +1,126 @@
+/* ── PANTALLA DE PORTALES ── */
+.portales-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a237e 0%, #1565c0 50%, #0288d1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.portales-wrapper {
+  width: 100%;
+  max-width: 960px;
+  text-align: center;
+}
+
+.portales-header {
+  color: white;
+  margin-bottom: 48px;
+}
+
+.portales-logo {
+  font-size: 64px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.portales-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.portales-header p {
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+/* ── GRID DE PORTALES ── */
+.portales-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.portal-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: 16px;
+  padding: 36px 24px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.portal-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+}
+
+.portal-icon {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.portal-card h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.portal-card p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.portal-btn {
+  margin-top: 8px;
+  padding: 10px 28px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+/* Colores por portal */
+.portal-alumno  { border-top: 5px solid #1565c0; }
+.portal-alumno  .portal-icon { filter: hue-rotate(0deg); }
+.portal-alumno  h2 { color: #1565c0; }
+.portal-alumno  .portal-btn { background: #1565c0; }
+
+.portal-docente { border-top: 5px solid #2e7d32; }
+.portal-docente h2 { color: #2e7d32; }
+.portal-docente .portal-btn { background: #2e7d32; }
+
+.portal-admin   { border-top: 5px solid #e65100; }
+.portal-admin   h2 { color: #e65100; }
+.portal-admin   .portal-btn { background: #e65100; }
+
+/* ── BOTÓN REGRESAR EN LOGIN ── */
+.login-back {
+  display: block;
+  text-align: left;
+  color: #1a73e8;
+  font-size: 13px;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+
+.login-back:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .portales-grid {
+    grid-template-columns: 1fr;
+  }
+  .portales-header h1 { font-size: 24px; }
+}

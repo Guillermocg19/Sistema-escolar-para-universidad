@@ -33,41 +33,76 @@ router.get('/:id', autorizar(['admin', 'docente']), async (req, res) => {
 });
 
 router.post('/', autorizar(['admin']), async (req, res) => {
-  const { matricula, nombre, apellidos, email, telefono, grupo_id, usuario_id } = req.body;
+  const { nombre, apellidos, email, telefono, grupo_id } = req.body;
 
-  if (!matricula || !nombre || !apellidos)
-    return res.status(400).json({ message: 'matricula, nombre y apellidos son requeridos' });
+  if (!nombre || !apellidos)
+    return res.status(400).json({ message: 'nombre y apellidos son requeridos' });
 
-  if (!/^2[1-9]\d{6}$/.test(matricula))
-    return res.status(400).json({ message: 'La matrícula debe tener formato YYNNNNNN (ej. 22440419)' });
-
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
+    await client.query('BEGIN');
+
+    // 1. Generar matrícula automática
+    const matResult = await client.query('SELECT generar_matricula() AS matricula');
+    const matricula = matResult.rows[0].matricula;
+
+    // 2. Crear usuario automático: primera letra del nombre + apellido + matricula
+    const usuario    = (nombre[0] + apellidos.split(' ')[0]).toLowerCase().replace(/\s/g,'') + matricula;
+    const contrasena = matricula; // contraseña inicial = matrícula
+
+    // 3. Crear usuario en tabla usuarios
+    const usuResult = await client.query(
+      `INSERT INTO usuarios (usuario, contrasena, nombre, rol)
+       VALUES ($1, $2, $3, 'alumno')
+       RETURNING id`,
+      [usuario, contrasena, `${nombre} ${apellidos}`]
+    );
+    const usuario_id = usuResult.rows[0].id;
+
+    // 4. Actualizar rol_id
+    const rolResult = await client.query("SELECT id FROM roles WHERE nombre = 'alumno'");
+    if (rolResult.rows.length > 0) {
+      await client.query('UPDATE usuarios SET rol_id = $1 WHERE id = $2', [rolResult.rows[0].id, usuario_id]);
+    }
+
+    // 5. Crear alumno
+    const alumResult = await client.query(
       `INSERT INTO alumnos (matricula, nombre, apellidos, email, telefono, grupo_id, usuario_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
-       RETURNING id, matricula, nombre, apellidos, email`,
-      [matricula, nombre, apellidos, email || null, telefono || null, grupo_id || null, usuario_id || null]
+       RETURNING id, matricula, nombre, apellidos`,
+      [matricula, nombre, apellidos, email || null, telefono || null, grupo_id || null, usuario_id]
     );
-    res.status(201).json(result.rows[0]);
+
+    await client.query('COMMIT');
+
+    res.status(201).json({
+      ...alumResult.rows[0],
+      usuario,
+      contrasena_inicial: contrasena,
+      mensaje: 'Alumno registrado. Guardar estas credenciales.'
+    });
+
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ message: 'La matrícula o email ya existe' });
+    await client.query('ROLLBACK');
+    if (err.code === '23505') return res.status(409).json({ message: 'El alumno o usuario ya existe' });
     res.status(500).json({ message: err.message });
+  } finally {
+    client.release();
   }
 });
 
 router.put('/:id', autorizar(['admin']), async (req, res) => {
-  const { nombre, apellidos, email, telefono, grupo_id, usuario_id, activo } = req.body;
+  const { nombre, apellidos, email, telefono, grupo_id, activo } = req.body;
   try {
     const result = await pool.query(
       `UPDATE alumnos SET nombre=$1, apellidos=$2, email=$3, telefono=$4,
-       grupo_id=$5, usuario_id=$6, activo=$7 WHERE id=$8
+       grupo_id=$5, activo=$6 WHERE id=$7
        RETURNING id, matricula, nombre, apellidos, activo`,
-      [nombre, apellidos, email || null, telefono || null, grupo_id || null, usuario_id || null, activo ?? true, req.params.id]
+      [nombre, apellidos, email || null, telefono || null, grupo_id || null, activo ?? true, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: 'Alumno no encontrado' });
     res.json(result.rows[0]);
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ message: 'El email ya está en uso' });
     res.status(500).json({ message: err.message });
   }
 });

@@ -30,7 +30,6 @@ async function cargarDocentes() {
 
 async function guardarDocente() {
   const id           = document.getElementById('edit-id').value;
-  const numero       = document.getElementById('f-numero').value.trim();
   const nombre       = document.getElementById('f-nombre').value.trim();
   const apellidos    = document.getElementById('f-apellidos').value.trim();
   const email        = document.getElementById('f-email').value.trim();
@@ -40,17 +39,26 @@ async function guardarDocente() {
   errorEl.textContent = '';
 
   if (!nombre || !apellidos) { errorEl.textContent = 'Nombre y apellidos son requeridos'; return; }
-  if (!id && !numero)        { errorEl.textContent = 'El número de empleado es requerido'; return; }
 
   try {
     const datos = { nombre, apellidos, email, telefono, especialidad };
-    if (!id) datos.numero_empleado = numero;
 
     const res = id
       ? await apiEditarDocente(id, datos)
       : await apiCrearDocente(datos);
 
     if (res.message && !res.id) { errorEl.textContent = res.message; return; }
+
+    if (!id && res.usuario) {
+      alert(
+        `Docente registrado exitosamente.\n\n` +
+        `No. Empleado: ${res.numero_empleado}\n` +
+        `Usuario: ${res.usuario}\n` +
+        `Contraseña inicial: ${res.contrasena_inicial}\n\n` +
+        `Guarda estos datos antes de cerrar.`
+      );
+    }
+
     limpiarForm();
     await cargarDocentes();
   } catch {

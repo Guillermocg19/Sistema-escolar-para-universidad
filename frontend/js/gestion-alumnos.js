@@ -41,28 +41,37 @@ async function cargarAlumnos() {
 }
 
 async function guardarAlumno() {
-  const id         = document.getElementById('edit-id').value;
-  const matricula  = document.getElementById('f-matricula').value.trim();
-  const nombre     = document.getElementById('f-nombre').value.trim();
-  const apellidos  = document.getElementById('f-apellidos').value.trim();
-  const email      = document.getElementById('f-email').value.trim();
-  const telefono   = document.getElementById('f-telefono').value.trim();
-  const grupo_id   = document.getElementById('f-grupo').value || null;
-  const errorEl    = document.getElementById('form-error');
+  const id        = document.getElementById('edit-id').value;
+  const nombre    = document.getElementById('f-nombre').value.trim();
+  const apellidos = document.getElementById('f-apellidos').value.trim();
+  const email     = document.getElementById('f-email').value.trim();
+  const telefono  = document.getElementById('f-telefono').value.trim();
+  const grupo_id  = document.getElementById('f-grupo').value || null;
+  const errorEl   = document.getElementById('form-error');
   errorEl.textContent = '';
 
   if (!nombre || !apellidos) { errorEl.textContent = 'Nombre y apellidos son requeridos'; return; }
-  if (!id && !matricula)     { errorEl.textContent = 'La matrícula es requerida';         return; }
 
   try {
     const datos = { nombre, apellidos, email, telefono, grupo_id };
-    if (!id) datos.matricula = matricula;
 
     const res = id
       ? await apiEditarAlumno(id, datos)
       : await apiCrearAlumno(datos);
 
     if (res.message && !res.id) { errorEl.textContent = res.message; return; }
+
+    // Mostrar credenciales si es nuevo registro
+    if (!id && res.usuario) {
+      alert(
+        `Alumno registrado exitosamente.\n\n` +
+        `Matrícula: ${res.matricula}\n` +
+        `Usuario: ${res.usuario}\n` +
+        `Contraseña inicial: ${res.contrasena_inicial}\n\n` +
+        `Guarda estos datos antes de cerrar.`
+      );
+    }
+
     limpiarForm();
     await cargarAlumnos();
   } catch {

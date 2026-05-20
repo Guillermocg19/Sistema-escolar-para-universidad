@@ -63,7 +63,20 @@ router.post('/', autorizar(['admin']), async (req, res) => {
       await client.query('UPDATE usuarios SET rol_id = $1 WHERE id = $2', [rolResult.rows[0].id, usuario_id]);
     }
 
-    // 5. Crear docente
+    // 5. Generar NIP de 4 dígitos
+    const nip = String(Math.floor(1000 + Math.random() * 9000));
+
+    // 6. Generar correo institucional
+    const primerNombre   = nombre.split(' ')[0].toLowerCase();
+    const primerApellido = apellidos.split(' ')[0].toLowerCase();
+    const correo_institucional = `${primerNombre}.${primerApellido}@tec.com`;
+
+    await client.query(
+    'UPDATE usuarios SET nip = $1, correo_institucional = $2 WHERE id = $3',
+    [nip, correo_institucional, usuario_id]
+);
+
+    // 7. Crear docente
     const docResult = await client.query(
       `INSERT INTO docentes (numero_empleado, nombre, apellidos, email, telefono, especialidad, usuario_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
@@ -77,6 +90,8 @@ router.post('/', autorizar(['admin']), async (req, res) => {
       ...docResult.rows[0],
       usuario,
       contrasena_inicial: contrasena,
+      nip,
+      correo_institucional,
       mensaje: 'Docente registrado. Guardar estas credenciales.'
     });
 

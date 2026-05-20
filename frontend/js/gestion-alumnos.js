@@ -66,8 +66,10 @@ async function guardarAlumno() {
       alert(
         `Alumno registrado exitosamente.\n\n` +
         `Matrícula: ${res.matricula}\n` +
-        `Usuario: ${res.usuario}\n` +
-        `Contraseña inicial: ${res.contrasena_inicial}\n\n` +
+        `Usuario para login: ${res.matricula}\n` +
+        `NIP: ${res.nip}\n` +
+        `Correo institucional: ${res.correo_institucional}\n\n` +
+        `El alumno puede iniciar sesión con su matrícula y NIP.\n` +
         `Guarda estos datos antes de cerrar.`
       );
     }

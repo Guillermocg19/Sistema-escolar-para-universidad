@@ -53,8 +53,10 @@ async function guardarDocente() {
       alert(
         `Docente registrado exitosamente.\n\n` +
         `No. Empleado: ${res.numero_empleado}\n` +
-        `Usuario: ${res.usuario}\n` +
-        `Contraseña inicial: ${res.contrasena_inicial}\n\n` +
+        `Usuario para login: ${res.numero_empleado}\n` +
+        `NIP: ${res.nip}\n` +
+        `Correo institucional: ${res.correo_institucional}\n\n` +
+        `El docente puede iniciar sesión con su número de empleado y NIP.\n` +
         `Guarda estos datos antes de cerrar.`
       );
     }

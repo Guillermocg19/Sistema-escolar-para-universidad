@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cambiar NIP</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Cambiar NIP</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card" style="max-width:400px; margin:0 auto;">
+    <h3>Cambiar mi NIP</h3>
+    <p style="color:#666; font-size:13px; margin-bottom:20px;">
+      Tu NIP es de 4 dígitos y se usa para iniciar sesión.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <input type="password" id="nip-actual"   placeholder="NIP actual" maxlength="4" inputmode="numeric">
+      <input type="password" id="nip-nuevo"    placeholder="NIP nuevo (4 dígitos)" maxlength="4" inputmode="numeric">
+      <input type="password" id="nip-confirmar" placeholder="Confirmar NIP nuevo" maxlength="4" inputmode="numeric">
+    </div>
+    <div class="form-actions" style="margin-top:16px;">
+      <button class="btn-primary" onclick="cambiarNip()">Guardar NIP</button>
+      <button class="btn-secondary" onclick="history.back()">← Regresar</button>
+    </div>
+    <p id="nip-error"  class="form-error"></p>
+    <p id="nip-exito"  style="color:#2e7d32; font-size:13px; margin-top:10px;"></p>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  window.onload = () => renderNavbar('Cambiar NIP');
+
+  async function cambiarNip() {
+    const actual    = document.getElementById('nip-actual').value.trim();
+    const nuevo     = document.getElementById('nip-nuevo').value.trim();
+    const confirmar = document.getElementById('nip-confirmar').value.trim();
+    const errorEl   = document.getElementById('nip-error');
+    const exitoEl   = document.getElementById('nip-exito');
+    errorEl.textContent = '';
+    exitoEl.textContent = '';
+
+    if (!actual || !nuevo || !confirmar) { errorEl.textContent = 'Completa todos los campos'; return; }
+    if (!/^\d{4}$/.test(nuevo))          { errorEl.textContent = 'El NIP nuevo debe ser 4 dígitos'; return; }
+    if (nuevo !== confirmar)             { errorEl.textContent = 'Los NIPs nuevos no coinciden'; return; }
+
+    const sesion = checkSesion();
+    if (!sesion) return;
+
+    try {
+      const r = await fetch(`${API_URL}/usuarios/${sesion.id}/cambiar-nip`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ nip_actual: actual, nip_nuevo: nuevo })
+      });
+      const data = await r.json();
+
+      if (r.ok) {
+        exitoEl.textContent = 'NIP actualizado correctamente.';
+        document.getElementById('nip-actual').value    = '';
+        document.getElementById('nip-nuevo').value     = '';
+        document.getElementById('nip-confirmar').value = '';
+      } else {
+        errorEl.textContent = data.message || 'Error al cambiar NIP';
+      }
+    } catch {
+      errorEl.textContent = 'Error de conexión';
+    }
+  }
+</script>
+</body>
+</html>

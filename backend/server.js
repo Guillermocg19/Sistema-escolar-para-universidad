@@ -8,6 +8,8 @@ const alumnosRouter  = require('./routes/alumnos');
 const docentesRouter = require('./routes/docentes');
 const gruposRouter   = require('./routes/grupos');
 const materiasRouter = require('./routes/materias');
+const aulasRouter    = require('./routes/aulas');
+const carrerasRouter  = require('./routes/carreras');
 
 const app = express();
 app.use(cors());
@@ -19,6 +21,8 @@ app.use('/alumnos',  alumnosRouter);
 app.use('/docentes', docentesRouter);
 app.use('/grupos',   gruposRouter);
 app.use('/materias', materiasRouter);
+app.use('/aulas',    aulasRouter);
+app.use('/carreras', carrerasRouter);
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;

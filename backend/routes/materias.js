@@ -125,4 +125,21 @@ router.delete('/:id/grupos/:mg_id', autorizar(['admin']), async (req, res) => {
   }
 });
 
+// PATCH /materias/:id/clave — editar solo la clave
+router.patch('/:id/clave', autorizar(['admin']), async (req, res) => {
+  const { clave } = req.body;
+  if (!clave) return res.status(400).json({ message: 'La clave es requerida' });
+  try {
+    const result = await pool.query(
+      'UPDATE materias SET clave=$1 WHERE id=$2 RETURNING id, clave, nombre',
+      [clave, req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Materia no encontrada' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ message: 'Esa clave ya existe' });
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

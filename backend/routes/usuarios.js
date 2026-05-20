@@ -79,4 +79,35 @@ router.delete('/:id', autorizar(['admin']), async (req, res) => {
   }
 });
 
+// PUT /usuarios/:id/cambiar-nip
+router.put('/:id/cambiar-nip', autorizar(['admin', 'docente', 'alumno']), async (req, res) => {
+  const { nip_actual, nip_nuevo } = req.body;
+
+  if (!nip_actual || !nip_nuevo)
+    return res.status(400).json({ message: 'nip_actual y nip_nuevo son requeridos' });
+
+  if (!/^\d{4}$/.test(nip_nuevo))
+    return res.status(400).json({ message: 'El NIP debe ser exactamente 4 dígitos' });
+
+  try {
+    // Verificar NIP actual (puede ser contrasena o nip)
+    const check = await pool.query(
+      'SELECT id FROM usuarios WHERE id = $1 AND (contrasena = $2 OR nip = $2)',
+      [req.params.id, nip_actual]
+    );
+
+    if (check.rows.length === 0)
+      return res.status(401).json({ message: 'NIP actual incorrecto' });
+
+    await pool.query(
+      'UPDATE usuarios SET nip = $1 WHERE id = $2',
+      [nip_nuevo, req.params.id]
+    );
+
+    res.json({ message: 'NIP actualizado correctamente' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

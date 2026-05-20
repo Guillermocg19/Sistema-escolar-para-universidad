@@ -65,7 +65,21 @@ router.post('/', autorizar(['admin']), async (req, res) => {
       await client.query('UPDATE usuarios SET rol_id = $1 WHERE id = $2', [rolResult.rows[0].id, usuario_id]);
     }
 
-    // 5. Crear alumno
+    // 5. Generar NIP de 4 dígitos
+    const nip = String(Math.floor(1000 + Math.random() * 9000));
+
+    // Generar correo institucional
+    const primerNombre   = nombre.split(' ')[0].toLowerCase();
+    const primerApellido = apellidos.split(' ')[0].toLowerCase();
+    const correo_institucional = `${primerNombre}.${primerApellido}@tec.com`;
+
+    // 6. Guardar NIP y correo en el usuario
+    await client.query(
+    'UPDATE usuarios SET nip = $1, correo_institucional = $2 WHERE id = $3',
+    [nip, correo_institucional, usuario_id]
+);
+
+    // 7. Crear alumno
     const alumResult = await client.query(
       `INSERT INTO alumnos (matricula, nombre, apellidos, email, telefono, grupo_id, usuario_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
@@ -79,6 +93,8 @@ router.post('/', autorizar(['admin']), async (req, res) => {
       ...alumResult.rows[0],
       usuario,
       contrasena_inicial: contrasena,
+      nip,
+      correo_institucional,
       mensaje: 'Alumno registrado. Guardar estas credenciales.'
     });
 

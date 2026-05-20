@@ -174,3 +174,64 @@ async function apiGetMisMateriasAlumno(usuario_id) {
   const r = await fetch(`${API_URL}/alumnos/mis-materias/${usuario_id}`, { headers: authHeaders() });
   return r.json();
 }
+
+// ── AULAS ──
+async function apiGetAulas() {
+  const r = await fetch(`${API_URL}/aulas`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiCrearAula(datos) {
+  const r = await fetch(`${API_URL}/aulas`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiEditarAula(id, datos) {
+  const r = await fetch(`${API_URL}/aulas/${id}`, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiEliminarAula(id) {
+  const r = await fetch(`${API_URL}/aulas/${id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return r.json();
+}
+
+// ── CARRERAS ──
+async function apiGetCarreras() {
+  const r = await fetch(`${API_URL}/carreras`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiCrearCarrera(datos) {
+  const r = await fetch(`${API_URL}/carreras`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiEditarCarrera(id, datos) {
+  const r = await fetch(`${API_URL}/carreras/${id}`, {
+    method: 'PUT', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiEliminarCarrera(id) {
+  const r = await fetch(`${API_URL}/carreras/${id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return r.json();
+}
+
+async function apiEditarClaveMateria(id, clave) {
+  const r = await fetch(`${API_URL}/materias/${id}/clave`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ clave })
+  });
+  return r.json();
+}

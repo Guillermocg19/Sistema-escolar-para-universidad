@@ -165,3 +165,15 @@ function limpiarForm() {
   document.getElementById('form-titulo').textContent = 'Nueva Materia';
   document.getElementById('form-error').textContent  = '';
 }
+
+async function editarClave(id, claveActual) {
+  const nueva = prompt(`Clave actual: ${claveActual}\nEscribe la nueva clave:`);
+  if (!nueva || nueva.trim() === '') return;
+  const res = await apiEditarClaveMateria(id, nueva.trim().toUpperCase());
+  if (res.message && !res.id) {
+    alert('Error: ' + res.message);
+    return;
+  }
+  alert(`Clave actualizada a: ${res.clave}`);
+  await cargarMaterias();
+}

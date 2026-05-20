@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Aulas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Aulas</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <button class="btn-secondary" style="margin-bottom:20px;" onclick="history.back()">← Regresar</button>
+
+  <div class="card">
+    <h3 id="form-titulo">Nueva Aula</h3>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <input type="text"   id="f-numero"    placeholder="Número de aula (ej. A101)">
+      <input type="number" id="f-capacidad" placeholder="Capacidad" min="1">
+      <input type="text"   id="f-edificio"  placeholder="Edificio">
+      <select id="f-tipo">
+        <option value="salon">Salón</option>
+        <option value="laboratorio">Laboratorio</option>
+        <option value="taller">Taller</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary"   onclick="guardarAula()">Guardar</button>
+      <button class="btn-secondary" onclick="limpiarForm()">Cancelar</button>
+    </div>
+    <p id="form-error" class="form-error"></p>
+  </div>
+
+  <div class="card">
+    <h3>Aulas registradas</h3>
+    <table class="tabla">
+      <thead>
+        <tr><th>Número</th><th>Capacidad</th><th>Edificio</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="tabla-aulas"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-aulas.js"></script>
+</body>
+</html>

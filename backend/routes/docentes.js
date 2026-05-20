@@ -4,9 +4,9 @@ const pool      = require('../db');
 const autorizar = require('../middleware/autorizar');
 
 const SELECT_DOCENTE = `
-  SELECT d.id, d.numero_empleado, d.nombre, d.apellidos, d.email,
+  SELECT d.id, d.numero_empleado, d.nombre, d.apellidos,
          d.telefono, d.especialidad, d.activo, d.creado_en,
-         u.id AS usuario_id, u.usuario
+         u.id AS usuario_id, u.usuario, u.correo_institucional
   FROM docentes d
   LEFT JOIN usuarios u ON d.usuario_id = u.id
 `;

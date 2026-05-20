@@ -4,10 +4,10 @@ const pool      = require('../db');
 const autorizar = require('../middleware/autorizar');
 
 const SELECT_ALUMNO = `
-  SELECT a.id, a.matricula, a.nombre, a.apellidos, a.email, a.telefono,
+  SELECT a.id, a.matricula, a.nombre, a.apellidos, a.telefono,
          a.activo, a.creado_en,
          g.id AS grupo_id, g.nombre AS grupo,
-         u.id AS usuario_id, u.usuario
+         u.id AS usuario_id, u.usuario, u.correo_institucional
   FROM alumnos a
   LEFT JOIN grupos   g ON a.grupo_id   = g.id
   LEFT JOIN usuarios u ON a.usuario_id = u.id

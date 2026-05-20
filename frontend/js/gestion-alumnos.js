@@ -23,14 +23,19 @@ async function cargarAlumnos() {
     tbody.innerHTML = '';
     alumnos.forEach(a => {
       const tr = document.createElement('tr');
+      tr.dataset.id     = a.id;
+      tr.dataset.nombre = a.nombre;
+      tr.dataset.apellidos = a.apellidos;
+      tr.dataset.telefono  = a.telefono || '';
+      tr.dataset.grupo_id  = a.grupo_id || '';
       tr.innerHTML = `
         <td>${a.matricula}</td>
         <td>${a.nombre}</td>
         <td>${a.apellidos}</td>
         <td>${a.grupo || '—'}</td>
-        <td>${a.email || '—'}</td>
+        <td>${a.correo_institucional || '—'}</td>
         <td>
-          <button class="btn-edit" onclick="editarAlumno(${a.id},'${a.matricula}','${a.nombre}','${a.apellidos}','${a.email||''}','${a.telefono||''}',${a.grupo_id||null})">Editar</button>
+          <button class="btn-edit" onclick="editarAlumno(${a.id})">Editar</button>
           <button class="btn-delete" onclick="eliminarAlumno(${a.id})">Eliminar</button>
         </td>`;
       tbody.appendChild(tr);
@@ -44,7 +49,6 @@ async function guardarAlumno() {
   const id        = document.getElementById('edit-id').value;
   const nombre    = document.getElementById('f-nombre').value.trim();
   const apellidos = document.getElementById('f-apellidos').value.trim();
-  const email     = document.getElementById('f-email').value.trim();
   const telefono  = document.getElementById('f-telefono').value.trim();
   const grupo_id  = document.getElementById('f-grupo').value || null;
   const errorEl   = document.getElementById('form-error');
@@ -53,7 +57,7 @@ async function guardarAlumno() {
   if (!nombre || !apellidos) { errorEl.textContent = 'Nombre y apellidos son requeridos'; return; }
 
   try {
-    const datos = { nombre, apellidos, email, telefono, grupo_id };
+    const datos = { nombre, apellidos, telefono, grupo_id };
 
     const res = id
       ? await apiEditarAlumno(id, datos)
@@ -61,7 +65,6 @@ async function guardarAlumno() {
 
     if (res.message && !res.id) { errorEl.textContent = res.message; return; }
 
-    // Mostrar credenciales si es nuevo registro
     if (!id && res.usuario) {
       alert(
         `Alumno registrado exitosamente.\n\n` +
@@ -81,18 +84,15 @@ async function guardarAlumno() {
   }
 }
 
-function editarAlumno(id, matricula, nombre, apellidos, email, telefono, grupo_id) {
+function editarAlumno(id) {
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
   document.getElementById('edit-id').value      = id;
-  document.getElementById('f-matricula').value  = matricula;
-  document.getElementById('f-nombre').value     = nombre;
-  document.getElementById('f-apellidos').value  = apellidos;
-  document.getElementById('f-email').value      = email;
-  document.getElementById('f-telefono').value   = telefono;
-  document.getElementById('f-grupo').value      = grupo_id || '';
-  document.getElementById('f-matricula').disabled = true;
+  document.getElementById('f-nombre').value     = tr.dataset.nombre;
+  document.getElementById('f-apellidos').value  = tr.dataset.apellidos;
+  document.getElementById('f-telefono').value   = tr.dataset.telefono;
+  document.getElementById('f-grupo').value      = tr.dataset.grupo_id;
   document.getElementById('form-titulo').textContent = 'Editar Alumno';
 }
-
 async function eliminarAlumno(id) {
   if (!confirm('¿Desactivar este alumno?')) return;
   await apiEliminarAlumno(id);
@@ -100,9 +100,8 @@ async function eliminarAlumno(id) {
 }
 
 function limpiarForm() {
-  ['edit-id','f-matricula','f-nombre','f-apellidos','f-email','f-telefono'].forEach(id => document.getElementById(id).value = '');
+  ['edit-id','f-nombre','f-apellidos','f-telefono'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-grupo').value = '';
-  document.getElementById('f-matricula').disabled = false;
   document.getElementById('form-titulo').textContent = 'Nuevo Alumno';
   document.getElementById('form-error').textContent  = '';
 }

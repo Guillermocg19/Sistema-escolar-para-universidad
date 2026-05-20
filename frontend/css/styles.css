@@ -1,22 +1,42 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+:root {
+  --blue:       #1558B0;
+  --blue-dark:  #0D2B5E;
+  --blue-light: #EBF2FC;
+  --blue-mid:   #C8D8F0;
+  --bg:         #EEF3FA;
+  --white:      #ffffff;
+  --text:       #0D2B5E;
+  --text-sub:   #7A90A8;
+  --border:     #DDE6F2;
+  --input-bg:   #F5F8FD;
+  --danger:     #DC3545;
+  --success:    #198754;
+  --shadow:     0 2px 12px rgba(13,43,94,0.08);
+  --radius:     10px;
+  --font:       'DM Sans', sans-serif;
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #f0f2f5;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── LOGIN ── */
+/* ══ LOGIN ══ */
 .login-container {
-  width: 340px;
+  width: 360px;
   margin: 80px auto;
-  padding: 36px 30px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 36px 32px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
   text-align: center;
 }
 
@@ -26,12 +46,14 @@ body {
 }
 
 .login-container h2 {
-  color: #1a73e8;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--blue);
   margin-bottom: 4px;
 }
 
 .login-subtitle {
-  color: #888;
+  color: var(--text-sub);
   font-size: 13px;
   margin-bottom: 24px;
 }
@@ -39,111 +61,143 @@ body {
 .login-container input {
   width: 100%;
   margin: 7px 0;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0 14px;
+  height: 42px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 13px;
+  font-family: var(--font);
+  background: var(--input-bg);
+  color: var(--text);
   text-align: left;
-}
-
-.login-container input:focus {
   outline: none;
-  border-color: #1a73e8;
+  transition: border .18s, background .18s;
 }
+.login-container input:focus {
+  border-color: var(--blue);
+  background: var(--white);
+}
+.login-container input::placeholder { color: #B0BDD0; }
 
 .login-container button {
   width: 100%;
   margin-top: 16px;
-  padding: 11px;
-  background: #1a73e8;
-  color: white;
+  height: 42px;
+  padding: 0;
+  background: var(--blue);
+  color: var(--white);
   border: none;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font);
   cursor: pointer;
-  transition: background 0.2s;
+  letter-spacing: .02em;
+  transition: background .18s, transform .15s;
 }
-
 .login-container button:hover {
-  background: #1558c0;
+  background: #0D459A;
+  transform: translateY(-1px);
 }
+.login-container button:active { transform: translateY(0); }
 
 #error {
   margin-top: 14px;
-  color: #d32f2f;
-  font-size: 13px;
+  color: var(--danger);
+  font-size: 12px;
+  min-height: 18px;
 }
 
-/* ── NAVBAR ── */
+/* ══ NAVBAR ══ */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1a73e8;
-  color: white;
-  padding: 12px 24px;
+  background: var(--white);
+  color: var(--text);
+  padding: 0 28px;
+  height: 54px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(13,43,94,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .navbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
-.navbar h2 { font-size: 18px; }
+.navbar h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue-dark);
+}
 
 .user-info {
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 500;
 }
 
 .navbar button {
-  padding: 6px 14px;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.4);
-  border-radius: 6px;
+  height: 34px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--text-sub);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
   cursor: pointer;
-  font-size: 13px;
-  transition: background 0.2s;
+  transition: all .15s;
+  width: auto;
 }
-
 .navbar button:hover {
-  background: rgba(255,255,255,0.35);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
-/* ── ROL BADGE ── */
+/* ══ ROL BADGE ══ */
 .rol-badge {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 12px;
+  border-radius: 20px;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: .04em;
 }
+.rol-alumno         { background: var(--blue-light); color: var(--blue); }
+.rol-docente        { background: #E6F4EC; color: #1A7A3F; }
+.rol-administrativo,
+.rol-admin          { background: #FEF3E2; color: #8B5A00; }
 
-.rol-alumno          { background: #e3f2fd; color: #1565c0; }
-.rol-docente         { background: #e8f5e9; color: #2e7d32; }
-.rol-administrativo  { background: #fff3e0; color: #e65100; }
-
-/* ── CONTENIDO DASHBOARD ── */
+/* ══ CONTENEDOR PRINCIPAL ══ */
 .container {
-  padding: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px;
 }
 
 .container h3 {
-  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
   margin-bottom: 10px;
 }
 
 .container p {
-  color: #666;
-  font-size: 14px;
+  color: var(--text-sub);
+  font-size: 13px;
   line-height: 1.6;
 }

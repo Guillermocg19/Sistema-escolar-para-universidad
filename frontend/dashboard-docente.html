@@ -15,38 +15,61 @@
   </div>
   <div class="navbar-right">
     <span class="user-info" id="navbar-usuario"></span>
-    <a href="cambiar-nip.html" style="color:white; font-size:13px; text-decoration:none; opacity:0.9;">🔑 Cambiar NIP</a>
+    <a href="cambiar-nip.html" style="font-size:12px; color:var(--text-sub); text-decoration:none; font-weight:600;">🔑 Cambiar NIP</a>
     <button onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
 
 <div class="container">
+
+  <!-- Mis materias y grupos -->
   <div class="card">
     <h3>Mis materias asignadas</h3>
-    <p style="color:#666; margin-bottom:16px; font-size:13px;">
-      Estas son las materias y grupos que tienes asignados este ciclo.
+    <p style="color:var(--text-sub); font-size:13px; margin-bottom:16px;">
+      Selecciona una materia para capturar calificaciones o ver la lista de alumnos.
     </p>
-    <table class="tabla" id="tabla-materias">
+    <table class="tabla">
       <thead>
         <tr>
-          <th>Clave</th>
-          <th>Materia</th>
-          <th>Créditos</th>
-          <th>Grupo</th>
-          <th>Grado</th>
-          <th>Turno</th>
+          <th>Clave</th><th>Materia</th><th>Créditos</th>
+          <th>Grupo</th><th>Grado</th><th>Turno</th><th>Acciones</th>
         </tr>
       </thead>
       <tbody id="tbody-materias">
-        <tr><td colspan="6">Cargando...</td></tr>
+        <tr><td colspan="7">Cargando...</td></tr>
       </tbody>
     </table>
   </div>
+
+  <!-- Captura de calificaciones -->
+  <div class="card" id="card-calificaciones" style="display:none;">
+    <h3 id="titulo-calificaciones">Calificaciones</h3>
+    <p style="color:var(--text-sub); font-size:12px; margin-bottom:16px;">
+      El promedio se calcula automáticamente. Haz clic en Guardar en cada alumno.
+    </p>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Matrícula</th><th>Nombre</th><th>Parcial 1</th>
+          <th>Parcial 2</th><th>Parcial 3</th><th>Promedio</th><th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-calificaciones"></tbody>
+    </table>
+    <div style="margin-top:16px;">
+      <button class="btn-secondary" onclick="cerrarCalificaciones()">← Regresar</button>
+      <button class="btn-secondary" style="margin-left:10px;" onclick="imprimirLista()">🖨️ Imprimir lista</button>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
+  let materiaActual = null;
+  let grupoActual   = null;
+
   window.onload = async () => {
     const sesion = checkSesion();
     if (!sesion || sesion.rol !== 'docente') {
@@ -54,13 +77,16 @@
       return;
     }
     renderNavbar('Portal Docente');
+    await cargarMisMaterias(sesion.id);
+  };
 
+  async function cargarMisMaterias(usuario_id) {
     const tbody = document.getElementById('tbody-materias');
     try {
-      const materias = await apiGetMisMateriasDocente(sesion.id);
+      const materias = await apiGetMisMateriasDocente(usuario_id);
       tbody.innerHTML = '';
       if (materias.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No tienes materias asignadas aún.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-sub);">No tienes materias asignadas aún.</td></tr>';
         return;
       }
       materias.forEach(m => {
@@ -71,13 +97,98 @@
           <td>${m.creditos}</td>
           <td>${m.grupo}</td>
           <td>${m.grado}°</td>
-          <td>${m.turno}</td>`;
+          <td>${m.turno}</td>
+          <td>
+            <button class="btn-edit" onclick="abrirCalificaciones(${m.id}, ${m.grupo_id}, '${m.nombre}', '${m.grupo}')">
+              📝 Calificaciones
+            </button>
+          </td>`;
         tbody.appendChild(tr);
       });
     } catch {
-      tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7">Error al cargar materias</td></tr>';
     }
-  };
+  }
+
+  async function abrirCalificaciones(materia_id, grupo_id, nombre_materia, nombre_grupo) {
+    materiaActual = materia_id;
+    grupoActual   = grupo_id;
+    document.getElementById('titulo-calificaciones').textContent =
+      `Calificaciones — ${nombre_materia} / Grupo ${nombre_grupo}`;
+    document.getElementById('card-calificaciones').style.display = 'block';
+    document.getElementById('card-calificaciones').scrollIntoView({ behavior: 'smooth' });
+    await cargarCalificaciones();
+  }
+
+  async function cargarCalificaciones() {
+    const tbody = document.getElementById('tbody-calificaciones');
+    tbody.innerHTML = '<tr><td colspan="7">Cargando...</td></tr>';
+    try {
+      const alumnos = await apiGetAlumnosConCalificaciones(grupoActual, materiaActual);
+      tbody.innerHTML = '';
+      alumnos.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.id = `row-${a.alumno_id}`;
+        tr.innerHTML = `
+          <td>${a.matricula}</td>
+          <td>${a.nombre} ${a.apellidos}</td>
+          <td><input type="number" min="0" max="10" step="0.1" value="${a.parcial1 ?? ''}" id="p1-${a.alumno_id}" style="width:70px;padding:4px;border:1px solid var(--border);border-radius:6px;text-align:center;"></td>
+          <td><input type="number" min="0" max="10" step="0.1" value="${a.parcial2 ?? ''}" id="p2-${a.alumno_id}" style="width:70px;padding:4px;border:1px solid var(--border);border-radius:6px;text-align:center;"></td>
+          <td><input type="number" min="0" max="10" step="0.1" value="${a.parcial3 ?? ''}" id="p3-${a.alumno_id}" style="width:70px;padding:4px;border:1px solid var(--border);border-radius:6px;text-align:center;"></td>
+          <td id="prom-${a.alumno_id}" style="font-weight:700; color:var(--blue);">${a.promedio ?? '—'}</td>
+          <td><button class="btn-primary" style="font-size:11px;height:28px;padding:0 12px;" onclick="guardarCalificacion(${a.alumno_id})">Guardar</button></td>`;
+        tbody.appendChild(tr);
+
+        // Calcular promedio en tiempo real
+        ['p1','p2','p3'].forEach(p => {
+          document.getElementById(`${p}-${a.alumno_id}`).addEventListener('input', () => {
+            calcularPromedio(a.alumno_id);
+          });
+        });
+      });
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="7">Error al cargar alumnos</td></tr>';
+    }
+  }
+
+  function calcularPromedio(alumno_id) {
+    const p1 = parseFloat(document.getElementById(`p1-${alumno_id}`).value);
+    const p2 = parseFloat(document.getElementById(`p2-${alumno_id}`).value);
+    const p3 = parseFloat(document.getElementById(`p3-${alumno_id}`).value);
+    const notas = [p1, p2, p3].filter(n => !isNaN(n));
+    const prom = notas.length > 0 ? (notas.reduce((s,n) => s+n, 0) / notas.length).toFixed(2) : '—';
+    document.getElementById(`prom-${alumno_id}`).textContent = prom;
+  }
+
+  async function guardarCalificacion(alumno_id) {
+    const p1 = document.getElementById(`p1-${alumno_id}`).value;
+    const p2 = document.getElementById(`p2-${alumno_id}`).value;
+    const p3 = document.getElementById(`p3-${alumno_id}`).value;
+    try {
+      await apiGuardarCalificacion({
+        alumno_id,
+        materia_id: materiaActual,
+        parcial1: p1 || null,
+        parcial2: p2 || null,
+        parcial3: p3 || null
+      });
+      const promEl = document.getElementById(`prom-${alumno_id}`);
+      promEl.style.color = 'var(--success, #198754)';
+      setTimeout(() => promEl.style.color = 'var(--blue)', 1500);
+    } catch {
+      alert('Error al guardar calificación');
+    }
+  }
+
+  function cerrarCalificaciones() {
+    document.getElementById('card-calificaciones').style.display = 'none';
+    materiaActual = null;
+    grupoActual   = null;
+  }
+
+  function imprimirLista() {
+    window.print();
+  }
 </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ const gruposRouter   = require('./routes/grupos');
 const materiasRouter = require('./routes/materias');
 const aulasRouter    = require('./routes/aulas');
 const carrerasRouter  = require('./routes/carreras');
+const calificacionesRouter = require('./routes/calificaciones');
 
 const app = express();
 app.use(cors());
@@ -23,6 +24,7 @@ app.use('/grupos',   gruposRouter);
 app.use('/materias', materiasRouter);
 app.use('/aulas',    aulasRouter);
 app.use('/carreras', carrerasRouter);
+app.use('/calificaciones', calificacionesRouter);
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;

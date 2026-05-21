@@ -139,7 +139,7 @@ router.get('/mis-materias/:usuario_id', autorizar(['docente', 'admin']), async (
   try {
     const result = await pool.query(
       `SELECT m.id, m.clave, m.nombre, m.creditos,
-              g.nombre AS grupo, g.grado, g.turno
+              g.id AS grupo_id, g.nombre AS grupo, g.grado, g.turno
        FROM materia_grupo mg
        JOIN materias m ON mg.materia_id = m.id
        JOIN grupos   g ON mg.grupo_id   = g.id

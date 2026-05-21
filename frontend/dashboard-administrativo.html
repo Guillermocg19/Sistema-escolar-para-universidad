@@ -14,19 +14,51 @@
   </div>
   <div class="navbar-right">
     <span class="user-info" id="navbar-usuario"></span>
+    <a href="cambiar-nip.html" style="color:white; font-size:13px; text-decoration:none; opacity:0.9;">🔑 Cambiar NIP</a>
     <button onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
 
 <div class="container">
-  <div style="display:flex; gap:12px; margin-top:20px;">
-  <a href="gestion-usuarios.html" class="btn-primary" style="text-decoration:none; padding:10px 20px; border-radius:6px; background:#1a73e8; color:white;">
-    👥 Gestionar Usuarios
-  </a>
-  <a href="gestion-roles.html" class="btn-primary" style="text-decoration:none; padding:10px 20px; border-radius:6px; background:#1a73e8; color:white;">
-    🔐 Gestionar Roles
-  </a>
-</div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px; margin-bottom:24px;">
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1a73e8;">
+      <div style="font-size:28px;margin-bottom:8px;">👨‍🎓</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Alumnos</div>
+      <a href="gestion-alumnos.html" style="text-decoration:none;color:#1a73e8;font-size:13px;">Gestionar →</a>
+    </div>
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1a73e8;">
+      <div style="font-size:28px;margin-bottom:8px;">👨‍🏫</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Docentes</div>
+      <a href="gestion-docentes.html" style="text-decoration:none;color:#1a73e8;font-size:13px;">Gestionar →</a>
+    </div>
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1a73e8;">
+      <div style="font-size:28px;margin-bottom:8px;">📚</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Materias</div>
+      <a href="gestion-materias.html" style="text-decoration:none;color:#1a73e8;font-size:13px;">Gestionar →</a>
+    </div>
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1a73e8;">
+      <div style="font-size:28px;margin-bottom:8px;">🏫</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Aulas</div>
+      <a href="gestion-aulas.html" style="text-decoration:none;color:#1a73e8;font-size:13px;">Gestionar →</a>
+    </div>
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1a73e8;">
+      <div style="font-size:28px;margin-bottom:8px;">🎓</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Carreras</div>
+      <a href="gestion-carreras.html" style="text-decoration:none;color:#1a73e8;font-size:13px;">Gestionar →</a>
+    </div>
+
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #e53935;">
+      <div style="font-size:28px;margin-bottom:8px;">📋</div>
+      <div style="font-weight:600;color:#333;margin-bottom:6px;">Inscripciones</div>
+      <a href="gestion-inscripciones.html" style="text-decoration:none;color:#e53935;font-size:13px;">Gestionar →</a>
+    </div>
+
+  </div>
 </div>
 
 <script src="js/dashboard.js"></script>

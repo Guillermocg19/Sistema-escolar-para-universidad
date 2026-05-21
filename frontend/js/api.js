@@ -235,3 +235,21 @@ async function apiEditarClaveMateria(id, clave) {
   });
   return r.json();
 }
+
+// ── CALIFICACIONES ──
+async function apiGetAlumnosConCalificaciones(grupo_id, materia_id) {
+  const r = await fetch(`${API_URL}/calificaciones/grupo/${grupo_id}/materia/${materia_id}`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiGuardarCalificacion(datos) {
+  const r = await fetch(`${API_URL}/calificaciones`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiGetHorarioDocente(usuario_id) {
+  const r = await fetch(`${API_URL}/calificaciones/docente/${usuario_id}/horario`, { headers: authHeaders() });
+  return r.json();
+}

@@ -21,20 +21,24 @@
 </div>
 
 <div class="container">
+  <div style="margin-bottom:20px;">
+    <a href="mis-calificaciones.html"
+       style="display:inline-block; padding:10px 22px; background:#1a73e8; color:white;
+              text-decoration:none; border-radius:8px; font-size:14px; font-weight:600;">
+      📊 Ver Mis Calificaciones
+    </a>
+  </div>
+
   <div class="card">
-    <h3>Mis materias</h3>
+    <h3>Mis materias inscritas</h3>
     <p style="color:#666; margin-bottom:16px; font-size:13px;">
       Materias asignadas a tu grupo este ciclo escolar.
     </p>
     <table class="tabla">
       <thead>
         <tr>
-          <th>Clave</th>
-          <th>Materia</th>
-          <th>Créditos</th>
-          <th>Docente</th>
-          <th>Grupo</th>
-          <th>Turno</th>
+          <th>Clave</th><th>Materia</th><th>Créditos</th>
+          <th>Docente</th><th>Grupo</th><th>Turno</th>
         </tr>
       </thead>
       <tbody id="tbody-materias">
@@ -49,29 +53,22 @@
 <script>
   window.onload = async () => {
     const sesion = checkSesion();
-    if (!sesion || sesion.rol !== 'alumno') {
-      window.location.href = 'login.html';
-      return;
-    }
+    if (!sesion || sesion.rol !== 'alumno') { window.location.href = 'login.html'; return; }
     renderNavbar('Portal Alumno');
-
     const tbody = document.getElementById('tbody-materias');
     try {
       const materias = await apiGetMisMateriasAlumno(sesion.id);
       tbody.innerHTML = '';
       if (materias.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No tienes materias asignadas aún.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No tienes materias asignadas aún.</td></tr>';
         return;
       }
       materias.forEach(m => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${m.clave}</td>
-          <td>${m.nombre}</td>
-          <td>${m.creditos}</td>
+          <td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td>
           <td>${m.docente_nombre ? m.docente_nombre + ' ' + m.docente_apellidos : '—'}</td>
-          <td>${m.grupo}</td>
-          <td>${m.turno}</td>`;
+          <td>${m.grupo}</td><td>${m.turno}</td>`;
         tbody.appendChild(tr);
       });
     } catch {

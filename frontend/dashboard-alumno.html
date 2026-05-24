@@ -5,6 +5,88 @@
   <title>Portal Alumno</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: var(--text-sub);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .15s;
+    }
+    .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .horario-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(5, 1fr);
+      gap: 4px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    .horario-header {
+      background: #1a73e8;
+      color: white;
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .horario-hora {
+      background: #e3f2fd;
+      color: #1a73e8;
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .horario-celda {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #dde6f2;
+      background: white;
+      min-height: 60px;
+      font-size: 11px;
+    }
+    .horario-celda.ocupado {
+      background: #e3f2fd;
+      border-color: #90caf9;
+    }
+    .horario-celda .materia-nombre { font-weight: 700; color: #1a73e8; }
+    .horario-celda .materia-info   { color: #666; font-size: 10px; margin-top: 2px; }
+
+    .promedio-chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .promedio-aprobado  { background: #e8f5e9; color: #2e7d32; }
+    .promedio-reprobado { background: #fce4ec; color: #c62828; }
+    .promedio-vacio     { background: #e3f2fd; color: #666; }
+
+    @media print {
+      .navbar, .tabs, .no-print { display: none !important; }
+      .tab-content { display: block !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -21,43 +103,106 @@
 </div>
 
 <div class="container">
-  <div style="margin-bottom:20px;">
-    <a href="mis-calificaciones.html"
-       style="display:inline-block; padding:10px 22px; background:#1a73e8; color:white;
-              text-decoration:none; border-radius:8px; font-size:14px; font-weight:600;">
-      📊 Ver Mis Calificaciones
-    </a>
+
+  <!-- Tabs -->
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="mostrarTab('materias', event)">📚 Mis Materias</button>
+    <button class="tab-btn"        onclick="mostrarTab('horario',  event)">🕐 Horario</button>
+    <button class="tab-btn"        onclick="mostrarTab('boleta',   event)">📋 Boleta</button>
   </div>
 
-  <div class="card">
-    <h3>Mis materias inscritas</h3>
-    <p style="color:#666; margin-bottom:16px; font-size:13px;">
-      Materias asignadas a tu grupo este ciclo escolar.
-    </p>
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Clave</th><th>Materia</th><th>Créditos</th>
-          <th>Docente</th><th>Grupo</th><th>Turno</th>
-        </tr>
-      </thead>
-      <tbody id="tbody-materias">
-        <tr><td colspan="6">Cargando...</td></tr>
-      </tbody>
-    </table>
+  <!-- TAB: Materias -->
+  <div class="tab-content active" id="tab-materias">
+    <div class="card">
+      <h3>Mis materias inscritas</h3>
+      <p style="color:#666; margin-bottom:16px; font-size:13px;">
+        Materias asignadas a tu grupo este ciclo escolar.
+      </p>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Clave</th><th>Materia</th><th>Créditos</th>
+            <th>Docente</th><th>Grupo</th><th>Turno</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-materias">
+          <tr><td colspan="6">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
+  <!-- TAB: Horario -->
+  <div class="tab-content" id="tab-horario">
+    <div class="card">
+      <h3>Mi horario semanal</h3>
+      <div id="horario-contenido" style="margin-top:16px;">
+        <p style="color:#666; font-size:13px;">Cargando horario...</p>
+      </div>
+      <div style="margin-top:16px;" class="no-print">
+        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimir horario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Boleta -->
+  <div class="tab-content" id="tab-boleta">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">Boleta de calificaciones</h3>
+          <p id="boleta-info" style="color:#666; font-size:12px;"></p>
+        </div>
+        <button class="btn-secondary no-print" onclick="window.print()">🖨️ Imprimir boleta</button>
+      </div>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Clave</th><th>Materia</th><th>Créditos</th>
+            <th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th>
+            <th>Promedio</th><th>Docente</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-boleta">
+          <tr><td colspan="8">Cargando...</td></tr>
+        </tbody>
+      </table>
+      <div id="promedio-general" style="margin-top:16px; text-align:right; font-size:14px; font-weight:700; color:#1a73e8;"></div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
+  const DIAS        = ['lunes','martes','miercoles','jueves','viernes'];
+  const DIAS_LABEL  = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes' };
+  const HORAS       = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+
+  let sesionGlobal = null;
+
   window.onload = async () => {
     const sesion = checkSesion();
     if (!sesion || sesion.rol !== 'alumno') { window.location.href = 'login.html'; return; }
+    sesionGlobal = sesion;
     renderNavbar('Portal Alumno');
+    await cargarMaterias();
+  };
+
+  function mostrarTab(tab, e) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    e.target.classList.add('active');
+    if (tab === 'horario') cargarHorario();
+    if (tab === 'boleta')  cargarBoleta();
+  }
+
+  async function cargarMaterias() {
     const tbody = document.getElementById('tbody-materias');
     try {
-      const materias = await apiGetMisMateriasAlumno(sesion.id);
+      const materias = await apiGetMisMateriasAlumno(sesionGlobal.id);
       tbody.innerHTML = '';
       if (materias.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No tienes materias asignadas aún.</td></tr>';
@@ -74,7 +219,95 @@
     } catch {
       tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>';
     }
-  };
+  }
+
+  async function cargarHorario() {
+    const contenedor = document.getElementById('horario-contenido');
+    try {
+      const horario = await apiGetHorarioAlumno(sesionGlobal.id);
+
+      if (horario.length === 0 || horario.every(h => !h.dia_semana)) {
+        contenedor.innerHTML = '<p style="color:#666; font-size:13px;">El horario aún no ha sido configurado por el administrador.</p>';
+        return;
+      }
+
+      let html = '<div class="horario-grid">';
+      html += '<div class="horario-header">Hora</div>';
+      DIAS.forEach(d => html += `<div class="horario-header">${DIAS_LABEL[d]}</div>`);
+
+      HORAS.forEach(hora => {
+        html += `<div class="horario-hora">${hora}</div>`;
+        DIAS.forEach(dia => {
+          const clase = horario.find(h =>
+            h.dia_semana === dia &&
+            h.hora_inicio && h.hora_inicio.slice(0,5) === hora
+          );
+          if (clase) {
+            html += `<div class="horario-celda ocupado">
+              <div class="materia-nombre">${clase.materia}</div>
+              <div class="materia-info">${clase.docente_nombre ? clase.docente_nombre + ' ' + clase.docente_apellidos : ''}</div>
+              <div class="materia-info">${clase.hora_inicio ? clase.hora_inicio.slice(0,5) : ''} - ${clase.hora_fin ? clase.hora_fin.slice(0,5) : ''}</div>
+            </div>`;
+          } else {
+            html += '<div class="horario-celda"></div>';
+          }
+        });
+      });
+
+      html += '</div>';
+      contenedor.innerHTML = html;
+    } catch {
+      contenedor.innerHTML = '<p style="color:#c62828;">Error al cargar horario.</p>';
+    }
+  }
+
+  async function cargarBoleta() {
+    const tbody      = document.getElementById('tbody-boleta');
+    const promGeneral = document.getElementById('promedio-general');
+    const boletaInfo  = document.getElementById('boleta-info');
+    try {
+      const boleta = await apiGetBoletaAlumno(sesionGlobal.id);
+      const user   = JSON.parse(localStorage.getItem('user'));
+      boletaInfo.textContent = `Alumno: ${user.nombre || user.usuario} — Periodo: 2025-1`;
+      tbody.innerHTML = '';
+
+      if (boleta.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Sin calificaciones registradas aún.</td></tr>';
+        return;
+      }
+
+      let suma = 0, cont = 0;
+      boleta.forEach(b => {
+        const prom = parseFloat(b.promedio);
+        let chipClass = 'promedio-vacio';
+        let promTexto = '—';
+        if (!isNaN(prom)) {
+          chipClass = prom >= 6 ? 'promedio-aprobado' : 'promedio-reprobado';
+          promTexto = prom.toFixed(2);
+          suma += prom; cont++;
+        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${b.clave}</td>
+          <td>${b.materia}</td>
+          <td>${b.creditos}</td>
+          <td>${b.parcial1 ?? '—'}</td>
+          <td>${b.parcial2 ?? '—'}</td>
+          <td>${b.parcial3 ?? '—'}</td>
+          <td><span class="promedio-chip ${chipClass}">${promTexto}</span></td>
+          <td>${b.docente_nombre ? b.docente_nombre + ' ' + b.docente_apellidos : '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      if (cont > 0) {
+        const pg    = (suma / cont).toFixed(2);
+        const color = parseFloat(pg) >= 6 ? '#2e7d32' : '#c62828';
+        promGeneral.innerHTML = `Promedio general: <span style="color:${color}; font-size:18px;">${pg}</span>`;
+      }
+    } catch {
+      tbody.innerHTML = '<tr><td colspan="8">Error al cargar boleta</td></tr>';
+    }
+  }
 </script>
 </body>
 </html>

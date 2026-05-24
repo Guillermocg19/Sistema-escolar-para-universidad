@@ -228,3 +228,13 @@ async function apiRegistrarCalificacion(datos) {
   const r = await fetch(`${API_URL}/calificaciones`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(datos) });
   return r.json();
 }
+// ── PORTAL ALUMNO ACADÉMICO ──
+async function apiGetHorarioAlumno(usuario_id) {
+  const r = await fetch(`${API_URL}/alumnos/horario/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiGetBoletaAlumno(usuario_id) {
+  const r = await fetch(`${API_URL}/alumnos/boleta/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}

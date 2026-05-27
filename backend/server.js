@@ -12,6 +12,7 @@ const aulasRouter          = require('./routes/aulas');
 const carrerasRouter       = require('./routes/carreras');
 const inscripcionesRouter  = require('./routes/inscripciones');
 const calificacionesRouter = require('./routes/calificaciones');
+const horariosRouter       = require('./routes/horarios');
 const aspirantesRouter     = require('./routes/aspirantes');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/aulas',          aulasRouter);
 app.use('/carreras',       carrerasRouter);
 app.use('/inscripciones',  inscripcionesRouter);
 app.use('/calificaciones', calificacionesRouter);
+app.use('/horarios',       horariosRouter);
 app.use('/aspirantes',     aspirantesRouter);
 
 app.post('/login', async (req, res) => {

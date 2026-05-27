@@ -5,100 +5,8 @@
   <title>Portal Alumno</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/gestion.css">
-  <style>
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--border);
-    }
-    .tab-btn {
-      padding: 10px 20px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: var(--font);
-      color: var(--text-sub);
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: all .15s;
-    }
-    .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .horario-grid {
-      display: grid;
-      grid-template-columns: 80px repeat(5, 1fr);
-      gap: 4px;
-      font-size: 12px;
-      overflow-x: auto;
-    }
-    .horario-header {
-      background: #1a73e8;
-      color: white;
-      padding: 8px;
-      text-align: center;
-      border-radius: 6px;
-      font-weight: 700;
-    }
-    .horario-hora {
-      background: #e3f2fd;
-      color: #1a73e8;
-      padding: 8px;
-      text-align: center;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .horario-celda {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #dde6f2;
-      background: white;
-      min-height: 60px;
-      font-size: 11px;
-    }
-    .horario-celda.ocupado {
-      background: #e3f2fd;
-      border-color: #90caf9;
-    }
-    .horario-celda .materia-nombre { font-weight: 700; color: #1a73e8; }
-    .horario-celda .materia-info   { color: #666; font-size: 10px; margin-top: 2px; }
-
-    .promedio-chip {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    .promedio-aprobado  { background: #e8f5e9; color: #2e7d32; }
-    .promedio-reprobado { background: #fce4ec; color: #c62828; }
-    .promedio-vacio     { background: #e3f2fd; color: #666; }
-
-    @media print {
-      .navbar, .tabs, .no-print { display: none !important; }
-      .tab-content { display: block !important; }
-    }
-
-.ret-card { border-radius:10px; padding:14px; border:2px solid; text-align:center; font-size:12px; }
-.ret-card.aprobado  { background:#e8f5e9; border-color:#66bb6a; }
-.ret-card.reprobado { background:#fce4ec; border-color:#ef9a9a; }
-.ret-card.en_curso  { background:#fff3e0; border-color:#ffb74d; }
-.ret-card.pendiente { background:#f5f5f5; border-color:#e0e0e0; color:#9e9e9e; }
-.ret-card .ret-clave { font-weight:700; font-size:13px; margin-bottom:4px; }
-.ret-card .ret-prom  { font-size:16px; font-weight:800; margin:4px 0; }
-.ret-card .ret-est   { font-size:10px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; }
-  </style>
 </head>
 <body>
-
 <div class="navbar">
   <div class="navbar-left">
     <h2 id="navbar-titulo">Portal Alumno</h2>
@@ -106,280 +14,113 @@
   </div>
   <div class="navbar-right">
     <span class="user-info" id="navbar-usuario"></span>
-    <a href="cambiar-nip.html" style="color:white; font-size:13px; text-decoration:none; opacity:0.9;">🔑 Cambiar NIP</a>
-    <button onclick="logout()">Cerrar sesión</button>
+    <a href="mis-calificaciones.html" class="navbar-link">Mis Calificaciones</a>
+    <a href="cambiar-nip.html" class="navbar-link">Cambiar NIP</a>
+    <button onclick="logout()">Cerrar sesion</button>
   </div>
 </div>
-
 <div class="container">
-
-  <!-- Tabs -->
   <div class="tabs no-print">
-    <button class="tab-btn active" onclick="mostrarTab('materias', event)">📚 Mis Materias</button>
-    <button class="tab-btn"        onclick="mostrarTab('horario',  event)">🕐 Horario</button>
-    <button class="tab-btn"        onclick="mostrarTab('boleta',   event)">📋 Boleta</button>
-    <button class="tab-btn" onclick="mostrarTab('reticular', event)">📊 Avance Reticular</button>
+    <button class="tab-btn active" onclick="mostrarTab('materias',event)">Mis Materias</button>
+    <button class="tab-btn"        onclick="mostrarTab('horario',event)">Horario</button>
+    <button class="tab-btn"        onclick="mostrarTab('boleta',event)">Boleta</button>
   </div>
-
-  <!-- TAB: Materias -->
   <div class="tab-content active" id="tab-materias">
     <div class="card">
       <h3>Mis materias inscritas</h3>
-      <p style="color:#666; margin-bottom:16px; font-size:13px;">
-        Materias asignadas a tu grupo este ciclo escolar.
-      </p>
       <table class="tabla">
-        <thead>
-          <tr>
-            <th>Clave</th><th>Materia</th><th>Créditos</th>
-            <th>Docente</th><th>Grupo</th><th>Turno</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-materias">
-          <tr><td colspan="6">Cargando...</td></tr>
-        </tbody>
+        <thead><tr><th>Clave</th><th>Materia</th><th>Creditos</th><th>Docente</th><th>Grupo</th><th>Turno</th></tr></thead>
+        <tbody id="tbody-materias"><tr><td colspan="6">Cargando...</td></tr></tbody>
       </table>
     </div>
   </div>
-
-  <!-- TAB: Horario -->
   <div class="tab-content" id="tab-horario">
     <div class="card">
       <h3>Mi horario semanal</h3>
-      <div id="horario-contenido" style="margin-top:16px;">
-        <p style="color:#666; font-size:13px;">Cargando horario...</p>
-      </div>
+      <div id="horario-contenido" style="margin-top:16px;"><p style="color:var(--text-sub);font-size:13px;">Cargando horario...</p></div>
       <div style="margin-top:16px;" class="no-print">
-        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimir horario</button>
+        <button class="btn-secondary" onclick="window.print()">Imprimir horario</button>
       </div>
     </div>
   </div>
-
-  <!-- TAB: Boleta -->
   <div class="tab-content" id="tab-boleta">
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div>
           <h3 style="margin-bottom:4px;">Boleta de calificaciones</h3>
-          <p id="boleta-info" style="color:#666; font-size:12px;"></p>
+          <p id="boleta-info" style="color:var(--text-sub);font-size:12px;"></p>
         </div>
-        <button class="btn-secondary no-print" onclick="window.print()">🖨️ Imprimir boleta</button>
+        <button class="btn-secondary no-print" onclick="window.print()">Imprimir boleta</button>
       </div>
       <table class="tabla">
-        <thead>
-          <tr>
-            <th>Clave</th><th>Materia</th><th>Créditos</th>
-            <th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th>
-            <th>Promedio</th><th>Docente</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-boleta">
-          <tr><td colspan="8">Cargando...</td></tr>
-        </tbody>
+        <thead><tr><th>Clave</th><th>Materia</th><th>Creditos</th><th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th><th>Promedio</th><th>Docente</th></tr></thead>
+        <tbody id="tbody-boleta"><tr><td colspan="8">Cargando...</td></tr></tbody>
       </table>
-      <div id="promedio-general" style="margin-top:16px; text-align:right; font-size:14px; font-weight:700; color:#1a73e8;"></div>
+      <div id="promedio-general" style="margin-top:16px;text-align:right;font-size:14px;font-weight:700;color:var(--blue);"></div>
     </div>
   </div>
-
-  <!-- TAB: Reticular -->
-  <div class="tab-content" id="tab-reticular">
-    <div class="card">
-      <h3>Mi avance reticular</h3>
-      <div id="resumen-reticular" style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;"></div>
-      <div id="reticular-grid"
-        style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:12px;">
-        <p style="color:#666; font-size:13px;">Cargando...</p>
-      </div>
-    </div>
-  </div>
-
 </div>
-
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
-  const DIAS        = ['lunes','martes','miercoles','jueves','viernes'];
-  const DIAS_LABEL  = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes' };
-  const HORAS       = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
-
-  let sesionGlobal = null;
-
-  window.onload = async () => {
-    const sesion = checkSesion();
-    if (!sesion || sesion.rol !== 'alumno') { window.location.href = 'login.html'; return; }
-    sesionGlobal = sesion;
-    renderNavbar('Portal Alumno');
-    await cargarMaterias();
+  const DIAS=['lunes','martes','miercoles','jueves','viernes'];
+  const DIAS_LABEL={lunes:'Lunes',martes:'Martes',miercoles:'Miercoles',jueves:'Jueves',viernes:'Viernes'};
+  const HORAS=['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+  let sesionGlobal=null;
+  window.onload=async()=>{
+    const sesion=checkSesion();
+    if(!sesion||sesion.rol!=='alumno'){window.location.href='login.html';return;}
+    sesionGlobal=sesion; renderNavbar('Portal Alumno'); await cargarMaterias();
   };
-
-  function mostrarTab(tab, e) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    e.target.classList.add('active');
-    if (tab === 'horario') cargarHorario();
-    if (tab === 'boleta')  cargarBoleta();
-    if (tab === 'reticular') cargarReticular();
+  function mostrarTab(tab,e){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active'); e.target.classList.add('active');
+    if(tab==='horario')cargarHorario(); if(tab==='boleta')cargarBoleta();
   }
-
-  async function cargarMaterias() {
-    const tbody = document.getElementById('tbody-materias');
-    try {
-      const materias = await apiGetMisMateriasAlumno(sesionGlobal.id);
-      tbody.innerHTML = '';
-      if (materias.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No tienes materias asignadas aún.</td></tr>';
-        return;
-      }
-      materias.forEach(m => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td>
-          <td>${m.docente_nombre ? m.docente_nombre + ' ' + m.docente_apellidos : '—'}</td>
-          <td>${m.grupo}</td><td>${m.turno}</td>`;
-        tbody.appendChild(tr);
-      });
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>';
-    }
+  async function cargarMaterias(){
+    const tbody=document.getElementById('tbody-materias');
+    try{
+      const materias=await apiGetMisMateriasAlumno(sesionGlobal.id); tbody.innerHTML='';
+      if(!materias.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-sub);">No tienes materias asignadas aun.</td></tr>';return;}
+      materias.forEach(m=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td><td>${m.docente_nombre?m.docente_nombre+' '+m.docente_apellidos:'—'}</td><td>${m.grupo}</td><td>${m.turno}</td>`;tbody.appendChild(tr);});
+    }catch{tbody.innerHTML='<tr><td colspan="6">Error al cargar materias</td></tr>';}
   }
-
-  async function cargarHorario() {
-    const contenedor = document.getElementById('horario-contenido');
-    try {
-      const horario = await apiGetHorarioAlumno(sesionGlobal.id);
-
-      if (horario.length === 0 || horario.every(h => !h.dia_semana)) {
-        contenedor.innerHTML = '<p style="color:#666; font-size:13px;">El horario aún no ha sido configurado por el administrador.</p>';
-        return;
-      }
-
-      let html = '<div class="horario-grid">';
-      html += '<div class="horario-header">Hora</div>';
-      DIAS.forEach(d => html += `<div class="horario-header">${DIAS_LABEL[d]}</div>`);
-
-      HORAS.forEach(hora => {
-        html += `<div class="horario-hora">${hora}</div>`;
-        DIAS.forEach(dia => {
-          const clase = horario.find(h =>
-            h.dia_semana === dia &&
-            h.hora_inicio && h.hora_inicio.slice(0,5) === hora
-          );
-          if (clase) {
-            html += `<div class="horario-celda ocupado">
-              <div class="materia-nombre">${clase.materia}</div>
-              <div class="materia-info">${clase.docente_nombre ? clase.docente_nombre + ' ' + clase.docente_apellidos : ''}</div>
-              <div class="materia-info">${clase.hora_inicio ? clase.hora_inicio.slice(0,5) : ''} - ${clase.hora_fin ? clase.hora_fin.slice(0,5) : ''}</div>
-            </div>`;
-          } else {
-            html += '<div class="horario-celda"></div>';
-          }
+  async function cargarHorario(){
+    const contenedor=document.getElementById('horario-contenido');
+    try{
+      const horario=await apiGetHorarioAlumno(sesionGlobal.id);
+      if(!horario.length||horario.every(h=>!h.dia_semana)){contenedor.innerHTML='<p style="color:var(--text-sub);font-size:13px;">El horario aun no ha sido configurado.</p>';return;}
+      let html='<div class="horario-grid"><div class="horario-header">Hora</div>';
+      DIAS.forEach(d=>html+=`<div class="horario-header">${DIAS_LABEL[d]}</div>`);
+      HORAS.forEach(hora=>{
+        html+=`<div class="horario-hora">${hora}</div>`;
+        DIAS.forEach(dia=>{
+          const clase=horario.find(h=>h.dia_semana===dia&&h.hora_inicio&&h.hora_inicio.slice(0,5)===hora);
+          html+=clase?`<div class="horario-celda ocupado"><div class="materia-nombre">${clase.materia}</div><div class="materia-info">${clase.docente_nombre?clase.docente_nombre+' '+clase.docente_apellidos:''}</div><div class="materia-info">${clase.hora_inicio?clase.hora_inicio.slice(0,5):''} - ${clase.hora_fin?clase.hora_fin.slice(0,5):''}</div></div>`:'<div class="horario-celda"></div>';
         });
       });
-
-      html += '</div>';
-      contenedor.innerHTML = html;
-    } catch {
-      contenedor.innerHTML = '<p style="color:#c62828;">Error al cargar horario.</p>';
-    }
+      contenedor.innerHTML=html+'</div>';
+    }catch{contenedor.innerHTML='<p style="color:var(--danger);">Error al cargar horario.</p>';}
   }
-
-  async function cargarBoleta() {
-    const tbody      = document.getElementById('tbody-boleta');
-    const promGeneral = document.getElementById('promedio-general');
-    const boletaInfo  = document.getElementById('boleta-info');
-    try {
-      const boleta = await apiGetBoletaAlumno(sesionGlobal.id);
-      const user   = JSON.parse(localStorage.getItem('user'));
-      boletaInfo.textContent = `Alumno: ${user.nombre || user.usuario} — Periodo: 2025-1`;
-      tbody.innerHTML = '';
-
-      if (boleta.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Sin calificaciones registradas aún.</td></tr>';
-        return;
-      }
-
-      let suma = 0, cont = 0;
-      boleta.forEach(b => {
-        const prom = parseFloat(b.promedio);
-        let chipClass = 'promedio-vacio';
-        let promTexto = '—';
-        if (!isNaN(prom)) {
-          chipClass = prom >= 6 ? 'promedio-aprobado' : 'promedio-reprobado';
-          promTexto = prom.toFixed(2);
-          suma += prom; cont++;
-        }
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${b.clave}</td>
-          <td>${b.materia}</td>
-          <td>${b.creditos}</td>
-          <td>${b.parcial1 ?? '—'}</td>
-          <td>${b.parcial2 ?? '—'}</td>
-          <td>${b.parcial3 ?? '—'}</td>
-          <td><span class="promedio-chip ${chipClass}">${promTexto}</span></td>
-          <td>${b.docente_nombre ? b.docente_nombre + ' ' + b.docente_apellidos : '—'}</td>`;
+  async function cargarBoleta(){
+    const tbody=document.getElementById('tbody-boleta'),promGeneral=document.getElementById('promedio-general'),boletaInfo=document.getElementById('boleta-info');
+    try{
+      const boleta=await apiGetBoletaAlumno(sesionGlobal.id),user=JSON.parse(localStorage.getItem('user'));
+      boletaInfo.textContent=`Alumno: ${user.nombre||user.usuario} — Periodo: 2025-1`;
+      tbody.innerHTML='';
+      if(!boleta.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-sub);">Sin calificaciones registradas aun.</td></tr>';return;}
+      let suma=0,cont=0;
+      boleta.forEach(b=>{
+        const prom=parseFloat(b.promedio);let chipClass='promedio-vacio',promTexto='—';
+        if(!isNaN(prom)){chipClass=prom>=6?'promedio-aprobado':'promedio-reprobado';promTexto=prom.toFixed(2);suma+=prom;cont++;}
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${b.clave}</td><td>${b.materia}</td><td>${b.creditos}</td><td>${b.parcial1??'—'}</td><td>${b.parcial2??'—'}</td><td>${b.parcial3??'—'}</td><td><span class="promedio-chip ${chipClass}">${promTexto}</span></td><td>${b.docente_nombre?b.docente_nombre+' '+b.docente_apellidos:'—'}</td>`;
         tbody.appendChild(tr);
       });
-
-      if (cont > 0) {
-        const pg    = (suma / cont).toFixed(2);
-        const color = parseFloat(pg) >= 6 ? '#2e7d32' : '#c62828';
-        promGeneral.innerHTML = `Promedio general: <span style="color:${color}; font-size:18px;">${pg}</span>`;
-      }
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="8">Error al cargar boleta</td></tr>';
-    }
+      if(cont>0){const pg=(suma/cont).toFixed(2);promGeneral.innerHTML=`Promedio general: <span style="color:${parseFloat(pg)>=6?'#1A7A3F':'var(--danger)'};font-size:18px;">${pg}</span>`;}
+    }catch{tbody.innerHTML='<tr><td colspan="8">Error al cargar boleta</td></tr>';}
   }
-
-  async function cargarReticular() {
-  const grid    = document.getElementById('reticular-grid');
-  const resumen = document.getElementById('resumen-reticular');
-  try {
-    const data = await apiGetReticular(sesionGlobal.id);
-    const ret  = data.reticular;
-
-    const aprobadas  = ret.filter(m => m.estado === 'aprobado').length;
-    const reprobadas = ret.filter(m => m.estado === 'reprobado').length;
-    const en_curso   = ret.filter(m => m.estado === 'en_curso').length;
-    const pendientes = ret.filter(m => m.estado === 'pendiente').length;
-    const pct = Math.round((aprobadas / ret.length) * 100);
-
-    resumen.innerHTML = `
-      <div style="background:#e8f5e9;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#2e7d32;">${aprobadas}</div>
-        <div style="font-size:11px;color:#555;">Aprobadas</div>
-      </div>
-      <div style="background:#fce4ec;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#c62828;">${reprobadas}</div>
-        <div style="font-size:11px;color:#555;">Reprobadas</div>
-      </div>
-      <div style="background:#fff3e0;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#e65100;">${en_curso}</div>
-        <div style="font-size:11px;color:#555;">En curso</div>
-      </div>
-      <div style="background:#f5f5f5;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#757575;">${pendientes}</div>
-        <div style="font-size:11px;color:#555;">Pendientes</div>
-      </div>
-      <div style="background:#e3f2fd;border-radius:8px;padding:12px 20px;text-align:center;">
-        <div style="font-size:28px;font-weight:800;color:#1a73e8;">${pct}%</div>
-        <div style="font-size:11px;color:#555;">Avance</div>
-      </div>`;
-
-    const ICONOS = { aprobado:'✅', reprobado:'❌', en_curso:'📖', pendiente:'⬜' };
-    grid.innerHTML = ret.map(m => `
-      <div class="ret-card ${m.estado}">
-        <div class="ret-clave">${m.clave}</div>
-        <div style="font-size:11px; margin-bottom:6px;">${m.nombre}</div>
-        <div class="ret-prom">${m.promedio !== null ? parseFloat(m.promedio).toFixed(1) : ICONOS[m.estado]}</div>
-        <div class="ret-est">${m.estado.replace('_',' ')}</div>
-        ${m.periodo ? `<div style="font-size:10px;color:#888;margin-top:4px;">${m.periodo}</div>` : ''}
-      </div>`).join('');
-  } catch {
-    grid.innerHTML = '<p style="color:#c62828;">Error al cargar reticular.</p>';
-  }
-}
 </script>
 </body>
 </html>

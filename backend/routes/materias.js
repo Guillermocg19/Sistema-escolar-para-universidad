@@ -142,4 +142,46 @@ router.patch('/:id/clave', autorizar(['admin']), async (req, res) => {
   }
 });
 
+// PATCH /materias/:id/grupos/:mg_id/horario — asignar horario a materia-grupo
+router.patch('/grupos/:mg_id/horario', autorizar(['admin']), async (req, res) => {
+  const { dia_semana, hora_inicio, hora_fin, aula_id } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE materia_grupo
+       SET dia_semana=$1, hora_inicio=$2, hora_fin=$3, aula_id=$4
+       WHERE id=$5
+       RETURNING id, dia_semana, hora_inicio, hora_fin, aula_id`,
+      [dia_semana || null, hora_inicio || null, hora_fin || null, aula_id || null, req.params.mg_id]
+    );
+    if (result.rows.length === 0)
+      return res.status(404).json({ message: 'Asignación no encontrada' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /materias/horarios — todos los horarios activos para vista admin
+router.get('/horarios/todos', autorizar(['admin']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT mg.id AS mg_id, m.clave, m.nombre AS materia,
+              g.id AS grupo_id, g.nombre AS grupo, g.turno,
+              d.nombre AS docente_nombre, d.apellidos AS docente_apellidos,
+              mg.dia_semana, mg.hora_inicio, mg.hora_fin,
+              au.numero AS aula
+       FROM materia_grupo mg
+       JOIN materias m ON mg.materia_id = m.id
+       JOIN grupos   g ON mg.grupo_id   = g.id
+       LEFT JOIN docentes d ON mg.docente_id = d.id
+       LEFT JOIN aulas   au ON mg.aula_id    = au.id
+       WHERE mg.activo = TRUE
+       ORDER BY g.nombre, mg.dia_semana, mg.hora_inicio`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

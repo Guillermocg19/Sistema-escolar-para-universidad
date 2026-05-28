@@ -233,18 +233,19 @@ async function apiGetHorarioAlumno(usuario_id) {
   const r = await fetch(`${API_URL}/alumnos/horario/${usuario_id}`, { headers: authHeaders() });
   return r.json();
 }
-
 async function apiGetBoletaAlumno(usuario_id) {
   const r = await fetch(`${API_URL}/alumnos/boleta/${usuario_id}`, { headers: authHeaders() });
   return r.json();
 }
-// ── HORARIO Y BOLETA ALUMNO ──
-async function apiGetHorarioAlumno(usuario_id) {
-  const r = await fetch(`${API_URL}/alumnos/horario/${usuario_id}`, { headers: authHeaders() });
+// ── HORARIOS ADMIN ──
+async function apiGetTodosHorarios() {
+  const r = await fetch(`${API_URL}/materias/horarios/todos`, { headers: authHeaders() });
   return r.json();
 }
 
-async function apiGetBoletaAlumno(usuario_id) {
-  const r = await fetch(`${API_URL}/alumnos/boleta/${usuario_id}`, { headers: authHeaders() });
+async function apiAsignarHorario(mg_id, datos) {
+  const r = await fetch(`${API_URL}/materias/${datos.materia_id}/grupos/${mg_id}/horario`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify(datos)
+  });
   return r.json();
 }

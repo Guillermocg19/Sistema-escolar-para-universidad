@@ -5,6 +5,20 @@
   <title>Portal Docente</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid var(--border); }
+    .tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:13px; font-weight:600; font-family:var(--font); color:var(--text-sub); border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .15s; }
+    .tab-btn.active { color:#1a73e8; border-bottom-color:#1a73e8; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .horario-grid { display:grid; grid-template-columns:80px repeat(5,1fr); gap:4px; font-size:12px; overflow-x:auto; }
+    .hg-header { background:var(--blue); color:white; padding:8px; text-align:center; border-radius:6px; font-weight:700; font-size:11px; }
+    .hg-hora { background:var(--blue-light); color:var(--blue); padding:8px; text-align:center; border-radius:6px; font-weight:600; font-size:11px; display:flex; align-items:center; justify-content:center; }
+    .hg-celda { padding:8px; border-radius:6px; border:1px solid var(--border); background:white; min-height:64px; font-size:11px; }
+    .hg-celda.ocupado { background:#e3f2fd; border-color:#90caf9; }
+    .hg-celda .mat-nombre { font-weight:700; color:var(--blue); }
+    .hg-celda .mat-info { color:#666; font-size:10px; margin-top:2px; }
+  </style>
 </head>
 <body>
 
@@ -15,13 +29,13 @@
   </div>
   <div class="navbar-right">
     <span class="user-info" id="navbar-usuario"></span>
-    <a href="cambiar-nip.html" style="color:white; font-size:13px; text-decoration:none; opacity:0.9;">🔑 Cambiar NIP</a>
+    <a href="cambiar-nip.html" style="color:white;font-size:13px;text-decoration:none;opacity:0.9;">🔑 Cambiar NIP</a>
     <button onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
 
 <div class="container">
-  <div style="margin-bottom:20px;">
+  <div style="margin-bottom:16px;">
     <a href="calificaciones-docente.html"
        style="display:inline-block; padding:10px 22px; background:#1a73e8; color:white;
               text-decoration:none; border-radius:8px; font-size:14px; font-weight:600;">
@@ -29,51 +43,114 @@
     </a>
   </div>
 
-  <div class="card">
-    <h3>Mis materias asignadas</h3>
-    <p style="color:#666; margin-bottom:16px; font-size:13px;">
-      Estas son las materias y grupos que tienes asignados este ciclo.
-    </p>
-    <table class="tabla" id="tabla-materias">
-      <thead>
-        <tr>
-          <th>Clave</th><th>Materia</th><th>Créditos</th>
-          <th>Grupo</th><th>Grado</th><th>Turno</th>
-        </tr>
-      </thead>
-      <tbody id="tbody-materias">
-        <tr><td colspan="6">Cargando...</td></tr>
-      </tbody>
-    </table>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="mostrarTab('materias', event)">📚 Mis Materias</button>
+    <button class="tab-btn"        onclick="mostrarTab('horario',  event)">🕐 Mi Horario</button>
+  </div>
+
+  <!-- TAB: Materias -->
+  <div class="tab-content active" id="tab-materias">
+    <div class="card">
+      <h3>Mis materias asignadas</h3>
+      <table class="tabla">
+        <thead>
+          <tr><th>Clave</th><th>Materia</th><th>Créditos</th><th>Grupo</th><th>Grado</th><th>Turno</th></tr>
+        </thead>
+        <tbody id="tbody-materias">
+          <tr><td colspan="6">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Horario -->
+  <div class="tab-content" id="tab-horario">
+    <div class="card">
+      <h3>Mi horario semanal</h3>
+      <div id="horario-docente-contenido" style="margin-top:16px;">
+        <p style="color:#666; font-size:13px;">Cargando...</p>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimir horario</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
+  const DIAS       = ['lunes','martes','miercoles','jueves','viernes'];
+  const DIAS_LABEL = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes' };
+  const HORAS      = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+  let sesionGlobal = null;
+
   window.onload = async () => {
     const sesion = checkSesion();
     if (!sesion || sesion.rol !== 'docente') { window.location.href = 'login.html'; return; }
+    sesionGlobal = sesion;
     renderNavbar('Portal Docente');
+    await cargarMaterias();
+  };
+
+  function mostrarTab(tab, e) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    e.target.classList.add('active');
+    if (tab === 'horario') cargarHorarioDocente();
+  }
+
+  async function cargarMaterias() {
     const tbody = document.getElementById('tbody-materias');
     try {
-      const materias = await apiGetMisMateriasDocente(sesion.id);
+      const materias = await apiGetMisMateriasDocente(sesionGlobal.id);
       tbody.innerHTML = '';
-      if (materias.length === 0) {
+      if (!materias.length) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No tienes materias asignadas aún.</td></tr>';
         return;
       }
       materias.forEach(m => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td>
-          <td>${m.grupo}</td><td>${m.grado}°</td><td>${m.turno}</td>`;
+        tr.innerHTML = `<td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td>
+                        <td>${m.grupo}</td><td>${m.grado}°</td><td>${m.turno}</td>`;
         tbody.appendChild(tr);
       });
-    } catch {
-      tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>';
-    }
-  };
+    } catch { tbody.innerHTML = '<tr><td colspan="6">Error al cargar materias</td></tr>'; }
+  }
+
+  async function cargarHorarioDocente() {
+    const contenedor = document.getElementById('horario-docente-contenido');
+    try {
+      const horario = await apiGetHorarioDocente(sesionGlobal.id);
+      const conHorario = horario.filter(h => h.dia_semana && h.hora_inicio);
+      if (!conHorario.length) {
+        contenedor.innerHTML = '<p style="color:#666;font-size:13px;">Tu horario aún no ha sido configurado por el administrador.</p>';
+        return;
+      }
+      let html = '<div class="horario-grid">';
+      html += '<div class="hg-header">Hora</div>';
+      DIAS.forEach(d => html += `<div class="hg-header">${DIAS_LABEL[d]}</div>`);
+      HORAS.forEach(hora => {
+        html += `<div class="hg-hora">${hora}</div>`;
+        DIAS.forEach(dia => {
+          const c = conHorario.find(h => h.dia_semana === dia && h.hora_inicio && h.hora_inicio.slice(0,5) === hora);
+          if (c) {
+            html += `<div class="hg-celda ocupado">
+              <div class="mat-nombre">${c.clave} — ${c.grupo}</div>
+              <div class="mat-info">${c.materia}</div>
+              <div class="mat-info">${c.aula ? '🏫 ' + c.aula : ''}</div>
+              <div class="mat-info">${c.hora_inicio.slice(0,5)} – ${c.hora_fin ? c.hora_fin.slice(0,5) : ''}</div>
+            </div>`;
+          } else {
+            html += '<div class="hg-celda"></div>';
+          }
+        });
+      });
+      html += '</div>';
+      contenedor.innerHTML = html;
+    } catch { contenedor.innerHTML = '<p style="color:#c62828;">Error al cargar horario.</p>'; }
+  }
 </script>
 </body>
 </html>

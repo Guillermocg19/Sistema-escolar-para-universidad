@@ -157,4 +157,27 @@ router.get('/mis-materias/:usuario_id', autorizar(['docente', 'admin']), async (
   }
 });
 
+// GET /docentes/horario/:usuario_id
+router.get('/horario/:usuario_id', autorizar(['docente', 'admin']), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT m.clave, m.nombre AS materia,
+              g.id AS grupo_id, g.nombre AS grupo, g.turno,
+              mg.id AS mg_id, mg.dia_semana, mg.hora_inicio, mg.hora_fin,
+              au.numero AS aula
+       FROM materia_grupo mg
+       JOIN materias m ON mg.materia_id = m.id
+       JOIN grupos   g ON mg.grupo_id   = g.id
+       JOIN docentes d ON mg.docente_id = d.id
+       LEFT JOIN aulas au ON mg.aula_id = au.id
+       WHERE d.usuario_id = $1 AND mg.activo = TRUE
+       ORDER BY mg.dia_semana, mg.hora_inicio`,
+      [req.params.usuario_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

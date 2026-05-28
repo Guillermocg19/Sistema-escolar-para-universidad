@@ -249,3 +249,8 @@ async function apiAsignarHorario(mg_id, datos) {
   });
   return r.json();
 }
+
+async function apiGetHorarioDocente(usuario_id) {
+  const r = await fetch(`${API_URL}/docentes/horario/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}

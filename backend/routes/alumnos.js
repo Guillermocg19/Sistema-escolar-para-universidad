@@ -137,11 +137,12 @@ router.delete('/:id', autorizar(['admin']), async (req, res) => {
   }
 });
 
-// Materias del alumno por su usuario_id
+// GET /alumnos/mis-materias/:usuario_id
 router.get('/mis-materias/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT m.id, m.clave, m.nombre, m.creditos,
+              mg.id AS mg_id,
               g.nombre AS grupo, g.grado, g.turno,
               d.nombre AS docente_nombre, d.apellidos AS docente_apellidos
        FROM alumnos a
@@ -149,52 +150,6 @@ router.get('/mis-materias/:usuario_id', autorizar(['alumno', 'admin']), async (r
        JOIN materia_grupo mg ON mg.grupo_id      = g.id AND mg.activo = TRUE
        JOIN materias      m  ON mg.materia_id    = m.id
        LEFT JOIN docentes d  ON mg.docente_id    = d.id
-       WHERE a.usuario_id = $1 AND a.activo = TRUE
-       ORDER BY m.nombre`,
-      [req.params.usuario_id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /alumnos/horario/:usuario_id — horario del alumno
-router.get('/horario/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT m.clave, m.nombre AS materia, g.nombre AS grupo, g.turno,
-              mg.dia_semana, mg.hora_inicio, mg.hora_fin,
-              d.nombre AS docente_nombre, d.apellidos AS docente_apellidos
-       FROM alumnos a
-       JOIN grupos        g  ON a.grupo_id   = g.id
-       JOIN materia_grupo mg ON mg.grupo_id  = g.id AND mg.activo = TRUE
-       JOIN materias      m  ON mg.materia_id = m.id
-       LEFT JOIN docentes d  ON mg.docente_id = d.id
-       WHERE a.usuario_id = $1 AND a.activo = TRUE
-       ORDER BY mg.dia_semana, mg.hora_inicio`,
-      [req.params.usuario_id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /alumnos/boleta/:usuario_id — boleta de calificaciones
-router.get('/boleta/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT m.clave, m.nombre AS materia, m.creditos,
-              c.parcial1, c.parcial2, c.parcial3, c.promedio, c.periodo,
-              d.nombre AS docente_nombre, d.apellidos AS docente_apellidos
-       FROM alumnos a
-       JOIN grupos        g  ON a.grupo_id    = g.id
-       JOIN materia_grupo mg ON mg.grupo_id   = g.id AND mg.activo = TRUE
-       JOIN materias      m  ON mg.materia_id = m.id
-       LEFT JOIN docentes d  ON mg.docente_id = d.id
-       LEFT JOIN calificaciones c
-         ON c.alumno_id = a.id AND c.materia_id = m.id
        WHERE a.usuario_id = $1 AND a.activo = TRUE
        ORDER BY m.nombre`,
       [req.params.usuario_id]
@@ -214,8 +169,8 @@ router.get('/horario/:usuario_id', autorizar(['alumno', 'admin']), async (req, r
               mg.dia_semana, mg.hora_inicio, mg.hora_fin,
               d.nombre AS docente_nombre, d.apellidos AS docente_apellidos
        FROM alumnos a
-       JOIN grupos        g  ON a.grupo_id    = g.id
-       JOIN materia_grupo mg ON mg.grupo_id   = g.id AND mg.activo = TRUE
+       JOIN grupos        g  ON a.grupo_id   = g.id
+       JOIN materia_grupo mg ON mg.grupo_id  = g.id AND mg.activo = TRUE
        JOIN materias      m  ON mg.materia_id = m.id
        LEFT JOIN docentes d  ON mg.docente_id = d.id
        WHERE a.usuario_id = $1 AND a.activo = TRUE
@@ -237,10 +192,9 @@ router.get('/boleta/:usuario_id', autorizar(['alumno', 'admin']), async (req, re
     );
     if (alumnoRes.rows.length === 0)
       return res.status(404).json({ message: 'Alumno no encontrado' });
-
     const alumno_id = alumnoRes.rows[0].id;
     const result = await pool.query(
-      `SELECT * FROM vista_calificaciones WHERE alumno_id = $1 ORDER BY materia`,
+      'SELECT * FROM vista_calificaciones WHERE alumno_id = $1 ORDER BY materia',
       [alumno_id]
     );
     res.json(result.rows);

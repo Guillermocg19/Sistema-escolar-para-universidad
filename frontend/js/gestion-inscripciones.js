@@ -11,8 +11,8 @@ function mostrarTab(tab) {
 
 async function init() {
   const [alumnos, grupos] = await Promise.all([
-    fetch(`${API_BASE}/alumnos`).then(r => r.json()),
-    fetch(`${API_BASE}/grupos`).then(r => r.json())
+    fetch(`${API_URL}/alumnos`, { headers: authHeaders() }).then(r => r.json()),
+    fetch(`${API_URL}/grupos`, { headers: authHeaders() }).then(r => r.json())
   ]);
 
   const selAlumno = document.getElementById('sel-alumno');

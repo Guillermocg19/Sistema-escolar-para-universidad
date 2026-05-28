@@ -31,7 +31,7 @@
       </div>
       <div>
         <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">Periodo</label>
-        <input id="inp-periodo" value="2026-1" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; width:100px;">
+        <input id="sel-periodo" value="2026-1" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; width:100px;">
       </div>
       <button onclick="cargarAlumnos()" style="padding:9px 20px; background:#1a73e8; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
         Cargar Alumnos
@@ -39,8 +39,8 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3 id="titulo-tabla">Alumnos</h3>
+  <div class="card" id="card-calificaciones">
+    <h3 id="titulo-tabla-cal">Alumnos</h3>
     <table class="tabla">
       <thead>
         <tr>

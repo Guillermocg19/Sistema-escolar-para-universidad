@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Avance Reticular</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .reticular-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-top:16px; }
+    .ret-card { border-radius:10px; padding:14px 14px 12px; border:1.5px solid #E8EEF8; position:relative; }
+    .ret-card.aprobado  { background:#F0FDF4; border-color:#86EFAC; }
+    .ret-card.reprobado { background:#FFF1F2; border-color:#FCA5A5; }
+    .ret-card.cursando  { background:#EFF6FF; border-color:#93C5FD; }
+    .ret-card.pendiente { background:#F9FAFB; border-color:#E5E7EB; }
+    .ret-estado { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .ret-estado.aprobado  { color:#16A34A; }
+    .ret-estado.reprobado { color:#DC2626; }
+    .ret-estado.cursando  { color:#2563EB; }
+    .ret-estado.pendiente { color:#9CA3AF; }
+    .ret-clave  { font-size:10px; color:#9CA3AF; margin-bottom:2px; }
+    .ret-nombre { font-size:13px; font-weight:700; color:#1C2B4A; line-height:1.3; margin-bottom:6px; }
+    .ret-creditos { font-size:11px; color:#6B7280; }
+    .ret-prom { font-size:20px; font-weight:800; text-align:right; position:absolute; top:12px; right:14px; }
+    .ret-prom.aprobado  { color:#16A34A; }
+    .ret-prom.reprobado { color:#DC2626; }
+    .ret-prom.cursando  { color:#2563EB; }
+    .stats-bar { display:flex; gap:16px; flex-wrap:wrap; background:white; border-radius:12px; padding:18px 20px; box-shadow:0 2px 12px rgba(13,43,94,0.07); border:1.5px solid #E8EEF8; margin-bottom:20px; }
+    .stat-item { text-align:center; }
+    .stat-num { font-size:28px; font-weight:800; color:#1C2B4A; }
+    .stat-lbl { font-size:11px; color:#7A90A8; text-transform:uppercase; letter-spacing:.05em; }
+    .periodo-section h4 { font-size:13px; font-weight:700; color:#7A90A8; text-transform:uppercase; letter-spacing:.08em; margin:24px 0 8px; padding-bottom:6px; border-bottom:1px solid #E8EEF8; }
+    .legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#6B7280; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <button onclick="history.back()" style="background:transparent;border:none;color:white;font-size:20px;cursor:pointer;padding:0 8px;">&#8592;</button>
+    <h2 id="navbar-titulo">Avance Reticular</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="stat-aprobadas">—</div><div class="stat-lbl">Aprobadas</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-reprobadas">—</div><div class="stat-lbl">Reprobadas</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-cursando">—</div><div class="stat-lbl">En curso</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-creditos">—</div><div class="stat-lbl">Créditos aprob.</div></div>
+  </div>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#86EFAC;"></span> Aprobada</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#FCA5A5;"></span> Reprobada</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#93C5FD;"></span> En curso</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#E5E7EB;"></span> Sin calificar</span>
+  </div>
+  <div id="reticular-contenido"><p style="color:#999;text-align:center;">Cargando avance reticular...</p></div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+window.onload = async () => {
+  const sesion = checkSesion();
+  if (!sesion || sesion.rol !== 'alumno') { window.location.href = 'login.html'; return; }
+  renderNavbar('Avance Reticular');
+  const contenedor = document.getElementById('reticular-contenido');
+  try {
+    const r = await fetch(`${API_URL}/alumnos/reticular/${sesion.id}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const materias = data.materias || [];
+    if (!materias.length) {
+      contenedor.innerHTML = '<p style="color:#999;text-align:center;">No tienes materias registradas aún.</p>';
+      return;
+    }
+    const aprobadas  = materias.filter(m => m.estado === 'aprobado').length;
+    const reprobadas = materias.filter(m => m.estado === 'reprobado').length;
+    const cursando   = materias.filter(m => !m.estado || m.estado === 'inscrito').length;
+    document.getElementById('stat-aprobadas').textContent  = aprobadas;
+    document.getElementById('stat-reprobadas').textContent = reprobadas;
+    document.getElementById('stat-cursando').textContent   = cursando;
+    document.getElementById('stat-creditos').textContent   = data.creditos_aprobados || 0;
+
+    const porPeriodo = {};
+    materias.forEach(m => {
+      const p = m.periodo || 'Sin periodo';
+      if (!porPeriodo[p]) porPeriodo[p] = [];
+      porPeriodo[p].push(m);
+    });
+
+    let html = '';
+    Object.keys(porPeriodo).sort().forEach(periodo => {
+      html += `<div class="periodo-section"><h4>Periodo ${periodo}</h4><div class="reticular-grid">`;
+      porPeriodo[periodo].forEach(m => {
+        const est = m.estado === 'aprobado' ? 'aprobado'
+                  : m.estado === 'reprobado' ? 'reprobado'
+                  : m.promedio_final !== null ? 'cursando' : 'pendiente';
+        const etiqueta = est === 'aprobado' ? '✓ Aprobada'
+                       : est === 'reprobado' ? '✗ Reprobada'
+                       : est === 'cursando'  ? '↻ En curso' : '○ Sin calificar';
+        const prom = m.promedio_final !== null ? m.promedio_final : '';
+        html += `<div class="ret-card ${est}">
+          <div class="ret-estado ${est}">${etiqueta}</div>
+          <div class="ret-clave">${m.clave}</div>
+          <div class="ret-nombre">${m.materia}</div>
+          <div class="ret-creditos">${m.creditos} créditos</div>
+          ${prom !== '' ? `<div class="ret-prom ${est}">${prom}</div>` : ''}
+        </div>`;
+      });
+      html += '</div></div>';
+    });
+    contenedor.innerHTML = html;
+  } catch {
+    contenedor.innerHTML = '<p style="color:#c62828;text-align:center;">Error al cargar el avance reticular.</p>';
+  }
+};
+</script>
+</body>
+</html>

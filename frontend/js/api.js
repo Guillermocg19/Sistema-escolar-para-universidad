@@ -254,3 +254,8 @@ async function apiGetHorarioDocente(usuario_id) {
   const r = await fetch(`${API_URL}/docentes/horario/${usuario_id}`, { headers: authHeaders() });
   return r.json();
 }
+
+async function apiGetReticular(usuario_id) {
+  const r = await fetch(`${API_URL}/alumnos/reticular/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}

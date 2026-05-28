@@ -203,4 +203,55 @@ router.get('/boleta/:usuario_id', autorizar(['alumno', 'admin']), async (req, re
   }
 });
 
+// GET /alumnos/reticular/:usuario_id
+router.get('/reticular/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
+  try {
+    const alumnoRes = await pool.query(
+      `SELECT a.id, a.nombre, a.apellidos, a.matricula, g.grado
+       FROM alumnos a
+       LEFT JOIN grupos g ON a.grupo_id = g.id
+       WHERE a.usuario_id = $1 AND a.activo = TRUE LIMIT 1`,
+      [req.params.usuario_id]
+    );
+    if (alumnoRes.rows.length === 0)
+      return res.status(404).json({ message: 'Alumno no encontrado' });
+
+    const alumno_id = alumnoRes.rows[0].id;
+
+    // Todas las materias del sistema
+    const todasRes = await pool.query(
+      'SELECT id, clave, nombre, creditos FROM materias WHERE activo = TRUE ORDER BY clave'
+    );
+
+    // Calificaciones del alumno
+    const calRes = await pool.query(
+      'SELECT * FROM vista_calificaciones WHERE alumno_id = $1',
+      [alumno_id]
+    );
+
+    const calMap = {};
+    calRes.rows.forEach(c => { calMap[c.materia_id] = c; });
+
+    const reticular = todasRes.rows.map(m => {
+      const cal = calMap[m.id];
+      let estado = 'pendiente';
+      if (cal) {
+        if (cal.estado === 'aprobado') estado = 'aprobado';
+        else if (cal.estado === 'reprobado') estado = 'reprobado';
+        else estado = 'en_curso';
+      }
+      return {
+        ...m,
+        estado,
+        promedio: cal ? cal.promedio_final : null,
+        periodo:  cal ? cal.periodo : null
+      };
+    });
+
+    res.json({ alumno: alumnoRes.rows[0], reticular });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

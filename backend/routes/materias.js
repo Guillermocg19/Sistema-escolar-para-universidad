@@ -143,14 +143,14 @@ router.patch('/:id/clave', autorizar(['admin']), async (req, res) => {
 });
 
 // PATCH /materias/:id/grupos/:mg_id/horario — asignar horario a materia-grupo
-router.patch('/:id/grupos/:mg_id/horario', autorizar(['admin']), async (req, res) => {
+router.patch('/grupos/:mg_id/horario', autorizar(['admin']), async (req, res) => {
   const { dia_semana, hora_inicio, hora_fin, aula_id } = req.body;
   try {
     const result = await pool.query(
       `UPDATE materia_grupo
        SET dia_semana=$1, hora_inicio=$2, hora_fin=$3, aula_id=$4
        WHERE id=$5
-       RETURNING id, materia_id, grupo_id, dia_semana, hora_inicio, hora_fin, aula_id`,
+       RETURNING id, dia_semana, hora_inicio, hora_fin, aula_id`,
       [dia_semana || null, hora_inicio || null, hora_fin || null, aula_id || null, req.params.mg_id]
     );
     if (result.rows.length === 0)

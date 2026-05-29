@@ -1,8 +1,9 @@
 const express = require('express');
 const router  = express.Router();
 const pool    = require('../db');
+const autorizar = require('../middleware/autorizar');
 
-router.get('/', async (req, res) => {
+router.get('/', autorizar(['admin', 'docente']), async (req, res) => {
   const { periodo } = req.query;
   try {
     const result = await pool.query(
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/alumno/:alumno_id', async (req, res) => {
+router.get('/alumno/:alumno_id', autorizar(['admin', 'docente', 'alumno']), async (req, res) => {
   const { periodo } = req.query;
   try {
     const result = await pool.query(
@@ -47,7 +48,7 @@ router.get('/alumno/:alumno_id', async (req, res) => {
   }
 });
 
-router.get('/materia-grupo/:mg_id', async (req, res) => {
+router.get('/materia-grupo/:mg_id', autorizar(['admin', 'docente']), async (req, res) => {
   const { periodo } = req.query;
   try {
     const result = await pool.query(
@@ -65,13 +66,21 @@ router.get('/materia-grupo/:mg_id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', autorizar(['admin']), async (req, res) => {
   const { alumno_id, materia_grupo_id, periodo } = req.body;
+  const per = periodo || '2026-1';
   try {
+    const reactivado = await pool.query(
+      `UPDATE inscripciones SET activo=TRUE, estado='inscrito'
+       WHERE alumno_id=$1 AND materia_grupo_id=$2 AND periodo=$3 AND activo=FALSE
+       RETURNING *`,
+      [alumno_id, materia_grupo_id, per]
+    );
+    if (reactivado.rows.length > 0) return res.status(201).json(reactivado.rows[0]);
     const result = await pool.query(
       `INSERT INTO inscripciones (alumno_id, materia_grupo_id, periodo)
        VALUES ($1, $2, $3) RETURNING *`,
-      [alumno_id, materia_grupo_id, periodo || '2026-1']
+      [alumno_id, materia_grupo_id, per]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -81,7 +90,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/grupo', async (req, res) => {
+router.post('/grupo', autorizar(['admin']), async (req, res) => {
   const { grupo_id, materia_grupo_ids, periodo } = req.body;
   const per = periodo || '2026-1';
   const client = await pool.connect();
@@ -93,14 +102,23 @@ router.post('/grupo', async (req, res) => {
     let nuevas = 0, omitidas = 0;
     for (const alumno of alumnos.rows) {
       for (const mg_id of materia_grupo_ids) {
+        const reactivado = await client.query(
+          `UPDATE inscripciones SET activo=TRUE, estado='inscrito'
+           WHERE alumno_id=$1 AND materia_grupo_id=$2 AND periodo=$3 AND activo=FALSE
+           RETURNING id`,
+          [alumno.id, mg_id, per]
+        );
+        if (reactivado.rows.length > 0) { nuevas++; continue; }
         try {
+          await client.query('SAVEPOINT sp_ins');
           await client.query(
-            `INSERT INTO inscripciones (alumno_id, materia_grupo_id, periodo)
-             VALUES ($1, $2, $3)`,
+            `INSERT INTO inscripciones (alumno_id, materia_grupo_id, periodo) VALUES ($1, $2, $3)`,
             [alumno.id, mg_id, per]
           );
+          await client.query('RELEASE SAVEPOINT sp_ins');
           nuevas++;
         } catch (e) {
+          await client.query('ROLLBACK TO SAVEPOINT sp_ins');
           if (e.code === '23505') omitidas++;
           else throw e;
         }
@@ -116,7 +134,7 @@ router.post('/grupo', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', autorizar(['admin']), async (req, res) => {
   const { estado } = req.body;
   try {
     const result = await pool.query(
@@ -129,7 +147,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', autorizar(['admin']), async (req, res) => {
   try {
     await pool.query(
       "UPDATE inscripciones SET activo=FALSE, estado='baja' WHERE id=$1",

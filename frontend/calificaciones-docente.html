@@ -7,51 +7,57 @@
   <link rel="stylesheet" href="css/gestion.css">
 </head>
 <body>
+
 <div class="navbar">
   <div class="navbar-left">
-    <button class="navbar-back" onclick="history.back()">&#8592;</button>
+    <button onclick="history.back()" style="background:transparent;border:none;color:white;font-size:20px;cursor:pointer;padding:0 8px;">&#8592;</button>
     <h2 id="navbar-titulo">Capturar Calificaciones</h2>
     <span id="navbar-rol" class="rol-badge"></span>
   </div>
   <div class="navbar-right">
     <span class="user-info" id="navbar-usuario"></span>
-    <button onclick="logout()">Cerrar sesion</button>
+    <button onclick="logout()">Cerrar sesión</button>
   </div>
 </div>
+
 <div class="container">
   <div class="card" style="margin-bottom:20px;">
-    <div class="form-row">
-      <div class="form-field form-field-md">
-        <label>Materia / Grupo</label>
-        <select id="sel-materia-grupo"><option value="">Seleccionar...</option></select>
+    <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+      <div>
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">Materia / Grupo</label>
+        <select id="sel-materia-grupo" onchange="onMateriaChange()" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:260px;">
+          <option value="">Seleccionar...</option>
+        </select>
       </div>
-      <div class="form-field form-field-sm">
-        <label>Periodo</label>
-        <input id="inp-periodo" value="2026-1">
+      <div>
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:4px;">Periodo</label>
+        <input id="sel-periodo" value="2026-1" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; width:100px;">
       </div>
-      <div class="form-field" style="justify-content:flex-end;">
-        <button class="btn-primary" onclick="cargarAlumnos()">Cargar Alumnos</button>
-      </div>
+      <button onclick="cargarAlumnos()" style="padding:9px 20px; background:#1558B0; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+        Cargar Alumnos
+      </button>
     </div>
   </div>
-  <div class="card">
-    <h3 id="titulo-tabla">Alumnos</h3>
+
+  <div class="card" id="card-calificaciones" style="display:none;">
+    <h3 id="titulo-tabla-cal">Alumnos</h3>
     <table class="tabla">
-      <thead><tr><th>Matricula</th><th>Alumno</th><th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th><th>Promedio</th><th>Estado</th><th>Guardar</th></tr></thead>
-      <tbody id="tbody-calificaciones"><tr><td colspan="8" style="text-align:center;color:var(--text-sub);">Selecciona una materia y carga los alumnos.</td></tr></tbody>
+      <thead>
+        <tr>
+          <th>Matrícula</th><th>Alumno</th>
+          <th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th>
+          <th>Promedio</th><th>Estado</th><th>Guardar</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-calificaciones">
+        <tr><td colspan="8" style="text-align:center;color:#999;">Selecciona una materia y carga los alumnos.</td></tr>
+      </tbody>
     </table>
   </div>
 </div>
+
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/calificaciones-docente.js"></script>
-<script>
-  window.onload=async()=>{
-    const sesion=checkSesion();
-    if(!sesion||sesion.rol!=='docente'){window.location.href='login.html';return;}
-    renderNavbar('Capturar Calificaciones');
-    await cargarMisMateriasGrupo(sesion.id);
-  };
-</script>
 </body>
 </html>

@@ -10,30 +10,34 @@ function mostrarTab(tab) {
 }
 
 async function init() {
-  const [alumnos, grupos] = await Promise.all([
-    fetch(`${API_URL}/alumnos`, { headers: authHeaders() }).then(r => r.json()),
-    fetch(`${API_URL}/grupos`, { headers: authHeaders() }).then(r => r.json())
-  ]);
+  try {
+    const [alumnos, grupos] = await Promise.all([
+      fetch(`${API_URL}/alumnos`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API_URL}/grupos`,  { headers: authHeaders() }).then(r => r.json())
+    ]);
 
-  const selAlumno = document.getElementById('sel-alumno');
-  alumnos.forEach(a => {
-    const o = document.createElement('option');
-    o.value = a.id;
-    o.textContent = `${a.matricula} – ${a.nombre} ${a.apellidos}`;
-    selAlumno.appendChild(o);
-  });
-
-  ['sel-grupo-ind', 'sel-grupo-masa'].forEach(id => {
-    const sel = document.getElementById(id);
-    grupos.forEach(g => {
+    const selAlumno = document.getElementById('sel-alumno');
+    alumnos.forEach(a => {
       const o = document.createElement('option');
-      o.value = g.id;
-      o.textContent = `${g.nombre} (${g.grado}° – ${g.turno})`;
-      sel.appendChild(o);
+      o.value = a.id;
+      o.textContent = `${a.matricula} – ${a.nombre} ${a.apellidos}`;
+      selAlumno.appendChild(o);
     });
-  });
 
-  cargarInscripciones();
+    ['sel-grupo-ind', 'sel-grupo-masa'].forEach(id => {
+      const sel = document.getElementById(id);
+      grupos.forEach(g => {
+        const o = document.createElement('option');
+        o.value = g.id;
+        o.textContent = `${g.nombre} (${g.grado}° – ${g.turno})`;
+        sel.appendChild(o);
+      });
+    });
+
+    cargarInscripciones();
+  } catch (e) {
+    console.error('Error al inicializar inscripciones:', e);
+  }
 }
 
 async function cargarMateriasGrupoInd() {
@@ -65,15 +69,16 @@ async function cargarMateriasGrupoMasa() {
 }
 
 async function inscribirAlumno() {
-  const alumno_id       = document.getElementById('sel-alumno').value;
+  const alumno_id        = document.getElementById('sel-alumno').value;
   const materia_grupo_id = document.getElementById('sel-mg').value;
-  const periodo         = document.getElementById('inp-periodo-ind').value.trim();
+  const periodo          = document.getElementById('inp-periodo-ind').value.trim();
   const msg = document.getElementById('msg-ind');
   if (!alumno_id || !materia_grupo_id || !periodo) {
     msg.textContent = 'Completa todos los campos.'; msg.style.color = '#e53935'; return;
   }
   try {
-    await apiCrearInscripcion({ alumno_id, materia_grupo_id, periodo });
+    const r = await apiCrearInscripcion({ alumno_id, materia_grupo_id, periodo });
+    if (r.error) { msg.textContent = r.error; msg.style.color = '#e53935'; return; }
     msg.textContent = '¡Inscripción exitosa!'; msg.style.color = '#388e3c';
     cargarInscripciones();
   } catch (e) {
@@ -96,6 +101,7 @@ async function inscribirGrupo() {
   }
   try {
     const r = await apiInscribirGrupo({ grupo_id, materia_grupo_ids, periodo });
+    if (r.error) { msg.textContent = r.error; msg.style.color = '#e53935'; return; }
     msg.textContent = `Listo: ${r.nuevas} nuevas, ${r.omitidas} ya existían.`;
     msg.style.color = '#388e3c';
     cargarInscripciones();

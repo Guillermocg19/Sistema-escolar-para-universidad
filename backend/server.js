@@ -14,6 +14,7 @@ const inscripcionesRouter  = require('./routes/inscripciones');
 const calificacionesRouter = require('./routes/calificaciones');
 const horariosRouter       = require('./routes/horarios');
 const aspirantesRouter     = require('./routes/aspirantes');
+const reticularRouter      = require('./routes/reticular');
 
 const app = express();
 app.use(cors());
@@ -32,7 +33,7 @@ app.use('/inscripciones',  inscripcionesRouter);
 app.use('/calificaciones', calificacionesRouter);
 app.use('/horarios',       horariosRouter);
 app.use('/aspirantes',     aspirantesRouter);
-
+app.use('/reticular',      reticularRouter);
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)

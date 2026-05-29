@@ -6,32 +6,103 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/gestion.css">
   <style>
-    .reticular-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-top:16px; }
-    .ret-card { border-radius:10px; padding:14px 14px 12px; border:1.5px solid #E8EEF8; position:relative; }
-    .ret-card.aprobado  { background:#F0FDF4; border-color:#86EFAC; }
-    .ret-card.reprobado { background:#FFF1F2; border-color:#FCA5A5; }
-    .ret-card.cursando  { background:#EFF6FF; border-color:#93C5FD; }
-    .ret-card.pendiente { background:#F9FAFB; border-color:#E5E7EB; }
-    .ret-estado { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
-    .ret-estado.aprobado  { color:#16A34A; }
-    .ret-estado.reprobado { color:#DC2626; }
-    .ret-estado.cursando  { color:#2563EB; }
-    .ret-estado.pendiente { color:#9CA3AF; }
-    .ret-clave  { font-size:10px; color:#9CA3AF; margin-bottom:2px; }
-    .ret-nombre { font-size:13px; font-weight:700; color:#1C2B4A; line-height:1.3; margin-bottom:6px; }
-    .ret-creditos { font-size:11px; color:#6B7280; }
-    .ret-prom { font-size:20px; font-weight:800; text-align:right; position:absolute; top:12px; right:14px; }
-    .ret-prom.aprobado  { color:#16A34A; }
-    .ret-prom.reprobado { color:#DC2626; }
-    .ret-prom.cursando  { color:#2563EB; }
-    .stats-bar { display:flex; gap:16px; flex-wrap:wrap; background:white; border-radius:12px; padding:18px 20px; box-shadow:0 2px 12px rgba(13,43,94,0.07); border:1.5px solid #E8EEF8; margin-bottom:20px; }
-    .stat-item { text-align:center; }
-    .stat-num { font-size:28px; font-weight:800; color:#1C2B4A; }
-    .stat-lbl { font-size:11px; color:#7A90A8; text-transform:uppercase; letter-spacing:.05em; }
-    .periodo-section h4 { font-size:13px; font-weight:700; color:#7A90A8; text-transform:uppercase; letter-spacing:.08em; margin:24px 0 8px; padding-bottom:6px; border-bottom:1px solid #E8EEF8; }
-    .legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
-    .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:#6B7280; }
-    .legend-dot { width:10px; height:10px; border-radius:50%; }
+    /* ── COLORES DE ESTADO (basados en imagen de referencia institucional) ── */
+    :root {
+      --col-acreditada:      #7CB87C;
+      --col-cursando:        #6B4F8A;
+      --col-sin-acreditar:   #B5B84A;
+      --col-en-repeticion:   #4A3D6B;
+      --col-especial:        #D4812A;
+      --col-disponible:      #5B9BD5;
+      --col-bloqueada:       #9CA3AF;
+      --col-reprobada-esp:   #DC2626;
+    }
+
+    /* ── ENCABEZADO ALUMNO ── */
+    .alumno-header {
+      background: linear-gradient(135deg, #1C2B4A 0%, #1558B0 100%);
+      border-radius: 14px; padding: 20px 28px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    }
+    .alumno-header h3 { color: #fff; font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+    .alumno-header p  { color: rgba(255,255,255,.65); font-size: 13px; margin: 0; }
+    .carrera-chip { background: rgba(255,255,255,.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+    /* ── BARRA DE RESUMEN ── */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff; border-radius: 10px; padding: 16px; text-align: center;
+      border: 1px solid #DDE6F2; box-shadow: 0 2px 8px rgba(13,43,94,.06);
+    }
+    .stat-num  { font-size: 26px; font-weight: 800; color: #1C2B4A; }
+    .stat-lbl  { font-size: 11px; color: #7A90A8; text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+
+    /* ── BARRA DE PROGRESO ── */
+    .progress-section { background: #fff; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; border: 1px solid #DDE6F2; }
+    .progress-top     { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #7A90A8; margin-bottom: 8px; }
+    .progress-wrap    { height: 12px; background: #EEF1F7; border-radius: 6px; overflow: hidden; }
+    .progress-bar     { height: 100%; background: linear-gradient(90deg, #43A047, #66BB6A); border-radius: 6px; transition: width .6s ease; }
+
+    /* ── LEYENDA ── */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+      background: #fff; padding: 14px 18px; border-radius: 10px; border: 1px solid #DDE6F2;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #4B5563; font-weight: 600; }
+    .legend-dot  { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── SEMESTRES ── */
+    .semestre-section { margin-bottom: 28px; }
+    .semestre-header  {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: #7A90A8; padding: 8px 12px; border-bottom: 2px solid #DDE6F2;
+      margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .semestre-chips { font-size: 11px; color: #9CA3AF; }
+    .materias-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+
+    /* ── TARJETA DE MATERIA ── */
+    .materia-card {
+      border-radius: 8px; padding: 12px 12px 10px;
+      position: relative; cursor: default;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .materia-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+
+    .materia-card.acreditada    { background: var(--col-acreditada);    color: #fff; }
+    .materia-card.cursando      { background: var(--col-cursando);      color: #fff; }
+    .materia-card.en_repeticion { background: var(--col-en-repeticion); color: #fff; }
+    .materia-card.sin_acreditar { background: var(--col-sin-acreditar); color: #fff; }
+    .materia-card.disponible    { background: var(--col-disponible);    color: #fff; }
+    .materia-card.bloqueada     { background: var(--col-bloqueada);     color: #fff; opacity: .8; }
+    .materia-card.especial      { background: var(--col-especial);      color: #fff; }
+
+    .mat-estado { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; opacity: .85; }
+    .mat-clave  { font-size: 9px; opacity: .7; margin-bottom: 2px; }
+    .mat-nombre { font-size: 12px; font-weight: 700; line-height: 1.25; margin-bottom: 5px; }
+    .mat-cred   { font-size: 10px; opacity: .75; }
+    .mat-prom   { font-size: 18px; font-weight: 800; position: absolute; top: 10px; right: 10px; opacity: .9; }
+    .mat-parciales { font-size: 9px; opacity: .7; margin-top: 2px; }
+
+    /* ── TOOLTIP prerrequisitos ── */
+    .prereq-badge {
+      font-size: 9px; background: rgba(0,0,0,.2); padding: 2px 6px; border-radius: 4px;
+      margin-top: 4px; display: inline-block;
+    }
+
+    /* ── SIN CARRERA ── */
+    .no-carrera-msg {
+      background: #FFF3E0; border-left: 4px solid #FFB74D; border-radius: 8px;
+      padding: 18px; margin: 20px 0; font-size: 14px; color: #6D4C1F;
+    }
+
+    @media (max-width: 600px) {
+      .materias-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      .stats-bar     { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -49,81 +120,170 @@
 </div>
 
 <div class="container">
-  <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num" id="stat-aprobadas">—</div><div class="stat-lbl">Aprobadas</div></div>
-    <div class="stat-item"><div class="stat-num" id="stat-reprobadas">—</div><div class="stat-lbl">Reprobadas</div></div>
-    <div class="stat-item"><div class="stat-num" id="stat-cursando">—</div><div class="stat-lbl">En curso</div></div>
-    <div class="stat-item"><div class="stat-num" id="stat-creditos">—</div><div class="stat-lbl">Créditos aprob.</div></div>
+  <div id="reticular-contenido">
+    <p style="color:#999;text-align:center;padding:40px 0;">Cargando avance reticular...</p>
   </div>
-  <div class="legend">
-    <span class="legend-item"><span class="legend-dot" style="background:#86EFAC;"></span> Aprobada</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#FCA5A5;"></span> Reprobada</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#93C5FD;"></span> En curso</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#E5E7EB;"></span> Sin calificar</span>
-  </div>
-  <div id="reticular-contenido"><p style="color:#999;text-align:center;">Cargando avance reticular...</p></div>
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script>
+const ESTADOS_CONFIG = {
+  acreditada:    { label: '✓ Acreditada',        clase: 'acreditada',    leyenda: '#7CB87C' },
+  cursando:      { label: '↻ Cursando',           clase: 'cursando',      leyenda: '#6B4F8A' },
+  en_repeticion: { label: '↻ En repetición',      clase: 'en_repeticion', leyenda: '#4A3D6B' },
+  sin_acreditar: { label: '⚠ Sin acreditar',      clase: 'sin_acreditar', leyenda: '#B5B84A' },
+  especial:      { label: '★ Especial',            clase: 'especial',      leyenda: '#D4812A' },
+  disponible:    { label: '○ Disponible',          clase: 'disponible',    leyenda: '#5B9BD5' },
+  bloqueada:     { label: '✕ Bloqueada',           clase: 'bloqueada',     leyenda: '#9CA3AF' }
+};
+
+function renderLeyenda() {
+  return `<div class="legend">
+    ${Object.entries(ESTADOS_CONFIG).map(([, cfg]) =>
+      `<div class="legend-item">
+        <div class="legend-dot" style="background:${cfg.leyenda}"></div>
+        <span>${cfg.label}</span>
+      </div>`
+    ).join('')}
+  </div>`;
+}
+
+function renderResumen(resumen) {
+  const pct = resumen.avance_pct || 0;
+  return `
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-num" style="color:#7CB87C">${resumen.acreditadas ?? resumen.aprobadas ?? 0}</div><div class="stat-lbl">Acreditadas</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#6B4F8A">${resumen.en_curso ?? 0}</div><div class="stat-lbl">En curso</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#5B9BD5">${resumen.disponibles ?? 0}</div><div class="stat-lbl">Disponibles</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#9CA3AF">${resumen.bloqueadas ?? 0}</div><div class="stat-lbl">Bloqueadas</div></div>
+      <div class="stat-card"><div class="stat-num">${resumen.creditos_aprobados}</div><div class="stat-lbl">Créditos aprobados</div></div>
+      <div class="stat-card"><div class="stat-num">${resumen.creditos_totales}</div><div class="stat-lbl">Créditos totales</div></div>
+    </div>
+    <div class="progress-section">
+      <div class="progress-top"><span>Avance general de la carrera</span><span>${pct}%</span></div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+function renderMateriaCard(m) {
+  const cfg     = ESTADOS_CONFIG[m.estado] || ESTADOS_CONFIG.bloqueada;
+  const promTxt = m.promedio !== null && m.promedio !== undefined ? m.promedio : '';
+  const parcTxt = (m.parciales_registrados > 0 && m.estado !== 'acreditada')
+    ? `<div class="mat-parciales">${m.parciales_registrados}/3 parciales</div>`
+    : '';
+  const prereqTxt = (m.estado === 'bloqueada' && m.prereqs_faltantes && m.prereqs_faltantes.length)
+    ? `<div class="prereq-badge">Requiere ${m.prereqs_faltantes.length} prereq.</div>`
+    : '';
+  return `
+    <div class="materia-card ${cfg.clase}" title="${m.nombre}">
+      ${promTxt !== '' ? `<div class="mat-prom">${promTxt}</div>` : ''}
+      <div class="mat-estado">${cfg.label}</div>
+      <div class="mat-clave">${m.clave}</div>
+      <div class="mat-nombre">${m.nombre}</div>
+      <div class="mat-cred">${m.creditos} créditos</div>
+      ${parcTxt}
+      ${prereqTxt}
+    </div>`;
+}
+
+function renderSemestres(semestres) {
+  const numeros = Object.keys(semestres).map(Number).sort((a, b) => a - b);
+  return numeros.map(num => {
+    const mats = semestres[num];
+    const acred = mats.filter(m => m.estado === 'acreditada').length;
+    return `
+      <div class="semestre-section">
+        <div class="semestre-header">
+          <span>Semestre ${num}</span>
+          <span class="semestre-chips">${acred}/${mats.length} acreditadas</span>
+        </div>
+        <div class="materias-grid">
+          ${mats.map(renderMateriaCard).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
 window.onload = async () => {
   const sesion = checkSesion();
-  if (!sesion || sesion.rol !== 'alumno') { window.location.href = 'login.html'; return; }
+  if (!sesion) return;
   renderNavbar('Avance Reticular');
+
   const contenedor = document.getElementById('reticular-contenido');
+
   try {
-    const r = await fetch(`${API_URL}/alumnos/reticular/${sesion.id}`, {
+    // Intentar endpoint nuevo primero
+    let data = null;
+    const rNuevo = await fetch(`${API_URL}/reticular/alumno/${sesion.id}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const materias = data.materias || [];
-    if (!materias.length) {
-      contenedor.innerHTML = '<p style="color:#999;text-align:center;">No tienes materias registradas aún.</p>';
+
+    if (rNuevo.ok) {
+      data = await rNuevo.json();
+    } else {
+      // Fallback al endpoint anterior
+      const rViejo = await fetch(`${API_URL}/alumnos/reticular/${sesion.id}`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      if (rViejo.ok) {
+        const viejo = await rViejo.json();
+        // Adaptar estructura antigua a nueva
+        contenedor.innerHTML = renderFallback(viejo);
+        return;
+      }
+      throw new Error('No se pudo cargar el avance reticular');
+    }
+
+    if (data.sin_carrera) {
+      contenedor.innerHTML = `
+        <div class="no-carrera-msg">
+          <strong>Sin carrera asignada</strong><br>
+          Tu perfil no tiene una carrera asociada aún. Contacta al administrador para que la configure.
+        </div>`;
       return;
     }
-    const aprobadas  = materias.filter(m => m.estado === 'aprobado').length;
-    const reprobadas = materias.filter(m => m.estado === 'reprobado').length;
-    const cursando   = materias.filter(m => !m.estado || m.estado === 'inscrito').length;
-    document.getElementById('stat-aprobadas').textContent  = aprobadas;
-    document.getElementById('stat-reprobadas').textContent = reprobadas;
-    document.getElementById('stat-cursando').textContent   = cursando;
-    document.getElementById('stat-creditos').textContent   = data.creditos_aprobados || 0;
 
-    const porPeriodo = {};
-    materias.forEach(m => {
-      const p = m.periodo || 'Sin periodo';
-      if (!porPeriodo[p]) porPeriodo[p] = [];
-      porPeriodo[p].push(m);
-    });
+    const alumno = data.alumno;
+    let html = `
+      <div class="alumno-header">
+        <div>
+          <h3>${alumno.nombre} ${alumno.apellidos}</h3>
+          <p>Matrícula: ${alumno.matricula}</p>
+        </div>
+        <div class="carrera-chip">${alumno.carrera_nombre || 'Sin carrera'}</div>
+      </div>
+      ${renderResumen(data.resumen)}
+      ${renderLeyenda()}
+      ${renderSemestres(data.semestres)}`;
 
-    let html = '';
-    Object.keys(porPeriodo).sort().forEach(periodo => {
-      html += `<div class="periodo-section"><h4>Periodo ${periodo}</h4><div class="reticular-grid">`;
-      porPeriodo[periodo].forEach(m => {
-        const est = m.estado === 'aprobado' ? 'aprobado'
-                  : m.estado === 'reprobado' ? 'reprobado'
-                  : m.promedio_final !== null ? 'cursando' : 'pendiente';
-        const etiqueta = est === 'aprobado' ? '✓ Aprobada'
-                       : est === 'reprobado' ? '✗ Reprobada'
-                       : est === 'cursando'  ? '↻ En curso' : '○ Sin calificar';
-        const prom = m.promedio_final !== null ? m.promedio_final : '';
-        html += `<div class="ret-card ${est}">
-          <div class="ret-estado ${est}">${etiqueta}</div>
-          <div class="ret-clave">${m.clave}</div>
-          <div class="ret-nombre">${m.materia}</div>
-          <div class="ret-creditos">${m.creditos} créditos</div>
-          ${prom !== '' ? `<div class="ret-prom ${est}">${prom}</div>` : ''}
-        </div>`;
-      });
-      html += '</div></div>';
-    });
     contenedor.innerHTML = html;
-  } catch {
-    contenedor.innerHTML = '<p style="color:#c62828;text-align:center;">Error al cargar el avance reticular.</p>';
+
+  } catch (err) {
+    contenedor.innerHTML = `<p style="color:#c62828;text-align:center;">Error al cargar el avance reticular: ${err.message}</p>`;
   }
 };
+
+// Fallback para alumnos sin carrera configurada (endpoint antiguo)
+function renderFallback(data) {
+  const todas = [
+    ...(data.aprobadas  || []).map(m => ({ ...m, estado: 'acreditada' })),
+    ...(data.en_curso   || []).map(m => ({ ...m, estado: 'cursando' })),
+    ...(data.reprobadas || []).map(m => ({ ...m, estado: 'sin_acreditar' })),
+    ...(data.pendientes || []).map(m => ({ ...m, estado: 'bloqueada' }))
+  ];
+  const r = data.resumen || {};
+  return `
+    <div class="no-carrera-msg" style="background:#E3F2FD;border-color:#1976D2;color:#0D47A1;">
+      <strong>Vista simplificada</strong> — No tienes carrera asignada. Se muestra el historial general.
+    </div>
+    ${renderResumen({ ...r, acreditadas: r.aprobadas || 0, disponibles: 0, bloqueadas: r.pendientes || 0 })}
+    ${renderLeyenda()}
+    <div class="semestre-section">
+      <div class="semestre-header"><span>Historial de materias</span></div>
+      <div class="materias-grid">${todas.map(renderMateriaCard).join('')}</div>
+    </div>`;
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SII — Iniciar Sesion</title>
+  <link rel="stylesheet" href="css/portales.css">
+</head>
+<body class="sii-page">
+
+  <div class="sii-logo-wrap">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </svg>
+  </div>
+
+  <div class="sii-inst-name">Tecnologico Nacional de Mexico</div>
+  <div class="sii-inst-sub">Sistema de Informacion Institucional</div>
+  <div class="sii-welcome">Bienvenido al SII</div>
+  <div class="sii-welcome-sub">Selecciona tu tipo de acceso para continuar</div>
+
+  <div class="sii-roles">
+    <button class="sii-role-card" id="role-aspirante" onclick="selectRole('aspirante')">
+      <div class="sii-role-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      Aspirante
+    </button>
+    <button class="sii-role-card" id="role-alumno" onclick="selectRole('alumno')">
+      <div class="sii-role-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      Alumno
+    </button>
+    <button class="sii-role-card" id="role-docente" onclick="selectRole('docente')">
+      <div class="sii-role-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      Docente
+    </button>
+    <button class="sii-role-card" id="role-admin" onclick="selectRole('admin')">
+      <div class="sii-role-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      Personal del<br>instituto
+    </button>
+  </div>
+
+  <div class="sii-form-card">
+    <div class="sii-form-header">
+      <div class="sii-form-icon" id="form-icon"></div>
+      <div>
+        <h3 id="form-titulo">Selecciona un tipo de acceso</h3>
+        <p id="form-sub">Elige una opcion arriba para continuar</p>
+      </div>
+    </div>
+    <div class="sii-field">
+      <label id="label-usuario">USUARIO</label>
+      <input type="text" id="username" placeholder="Tu usuario" autocomplete="username">
+    </div>
+    <div class="sii-field">
+      <label>CONTRASENA</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="sii-submit" onclick="login()">Iniciar sesion</button>
+    <p id="error"></p>
+    <div class="sii-form-links">
+      <a href="login.html">Regresar al menu principal</a>
+      <a href="registro-aspirante.html">¿No tienes cuenta? Regístrate como aspirante</a>
+    </div>
+  </div>
+
+  <footer class="sii-footer">SII · Tecnologico Nacional de Mexico · Ciclo escolar 2025-2026</footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    var SVG_ATTR = 'viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"';
+    var ICONS = {
+      aspirante: '<svg '+SVG_ATTR+'><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      alumno:    '<svg '+SVG_ATTR+'><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+      docente:   '<svg '+SVG_ATTR+'><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+      admin:     '<svg '+SVG_ATTR+'><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+    };
+    var ROLES = {
+      aspirante: { titulo:'Acceso aspirantes',    sub:'Registro no disponible actualmente',    label:'USUARIO',            ph:'Tu nombre de usuario' },
+      alumno:    { titulo:'Acceso alumnos',        sub:'Ingresa tu matricula y contrasena',     label:'MATRICULA',          ph:'Ej. 2024001234' },
+      docente:   { titulo:'Acceso docentes',       sub:'Ingresa tu numero de empleado',         label:'NUMERO DE EMPLEADO', ph:'Ej. EMP001' },
+      admin:     { titulo:'Acceso administrativo', sub:'Ingresa tus credenciales de acceso',    label:'USUARIO',            ph:'Tu usuario de acceso' }
+    };
+    function selectRole(rol) {
+      document.querySelectorAll('.sii-role-card').forEach(function(b){ b.classList.remove('active'); });
+      var btn = document.getElementById('role-'+rol);
+      if (btn) btn.classList.add('active');
+      var r = ROLES[rol];
+      if (r) {
+        document.getElementById('form-titulo').textContent = r.titulo;
+        document.getElementById('form-sub').textContent = r.sub;
+        document.getElementById('label-usuario').textContent = r.label;
+        document.getElementById('username').placeholder = r.ph;
+        document.getElementById('form-icon').innerHTML = ICONS[rol]||ICONS.alumno;
+      }
+    }
+    var portal = new URLSearchParams(window.location.search).get('portal');
+    selectRole(portal && ROLES[portal] ? portal : 'alumno');
+  </script>
+</body>
+</html>

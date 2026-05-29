@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Grupos</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+    .grupo-btn{width:100%;text-align:left;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--input-bg);cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;transition:all .15s}
+    .grupo-btn:hover{border-color:var(--blue);background:var(--blue-light)}
+    .grupo-btn.active{border-color:var(--blue);background:var(--blue-light);font-weight:700}
+    .grupo-sub{font-size:11px;color:var(--text-sub)}
+    .panel-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .panel-title{font-size:15px;font-weight:700;color:var(--blue-dark)}
+    .materia-row{border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+    .materia-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;background:var(--white);transition:background .15s}
+    .materia-head:hover{background:#FAFCFF}
+    .materia-name{font-size:13px;font-weight:700;color:var(--blue-dark)}
+    .materia-meta{font-size:11px;color:var(--text-sub)}
+    .materia-chips{display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 10px}
+    .chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;background:var(--blue-light);color:var(--blue-dark);font-size:11px;font-weight:600}
+    .chip-x{cursor:pointer;border:none;background:none;color:var(--text-sub);font-size:14px;line-height:1;padding:0;font-family:inherit}
+    .chip-x:hover{color:var(--danger)}
+    .materia-body{padding:12px 14px;border-top:1px solid var(--border);background:#FAFCFF;display:none}
+    .materia-row.open .materia-body{display:block}
+    .materia-row.open .materia-head{background:var(--blue-light)}
+    .dias-row{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+    .dia-btn{padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--text-sub);transition:all .15s}
+    .dia-btn.sel{background:var(--blue);color:white;border-color:var(--blue)}
+    .hora-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+    .hora-row input[type=time]{height:34px;padding:0 8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--font);background:var(--white);color:var(--text);outline:none}
+    .hora-row label{font-size:12px;color:var(--text-sub)}
+    .btn-agregar{height:34px;padding:0 14px;background:var(--blue);color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer}
+    .btn-agregar:hover{background:#0D459A}
+    .docente-row{display:flex;gap:8px;align-items:center;padding-top:10px;border-top:1px solid var(--border)}
+    .docente-row select{flex:1;height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-family:var(--font);background:var(--white);color:var(--text);outline:none}
+    .btn-doc{height:34px;padding:0 12px;background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7;border-radius:6px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer}
+    .btn-doc:hover{background:#43A047;color:white;border-color:#43A047}
+    .btn-quitar-mat{height:26px;padding:0 10px;background:#FEF0F0;color:var(--danger);border:1px solid #FBD5D5;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer}
+    .btn-quitar-mat:hover{background:var(--danger);color:white;border-color:var(--danger)}
+    #form-asignar{display:none;background:var(--blue-light);padding:12px;border-radius:8px;margin-bottom:12px}
+    #form-asignar .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    #form-asignar select{flex:1;min-width:150px;height:36px;padding:0 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font)}
+    .toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:var(--font);z-index:9999;opacity:0;transition:opacity .2s}
+    .toast.show{opacity:1}
+    .toast.ok{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+    .toast.err{background:#FEF0F0;color:var(--danger);border:1px solid #FBD5D5}
+    .empty-state{text-align:center;color:var(--text-sub);padding:40px 0;font-size:13px}
+    .chevron{font-size:12px;color:var(--text-sub);transition:transform .2s}
+    .materia-row.open .chevron{transform:rotate(180deg)}
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Grupos</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <a href="dashboard-administrativo.html" style="color:white;font-size:13px;text-decoration:none;opacity:.9;">← Panel</a>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+<div class="container">
+  <div class="card">
+    <h3 id="form-titulo">Nuevo Grupo</h3>
+    <input type="hidden" id="edit-id">
+    <div class="form-grid" style="grid-template-columns:1fr 90px 160px;">
+      <input id="f-nombre" placeholder="Nombre (ej. 1-A)"/>
+      <input id="f-grado" type="number" placeholder="Grado" min="1" max="9"/>
+      <select id="f-turno">
+        <option value="matutino">Matutino</option>
+        <option value="vespertino">Vespertino</option>
+        <option value="nocturno">Nocturno</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="guardarGrupo()">Guardar grupo</button>
+      <button class="btn-secondary" onclick="limpiarForm()">Limpiar</button>
+    </div>
+    <div class="form-error" id="form-error"></div>
+  </div>
+  <div class="layout">
+    <div class="card" style="margin-bottom:0;">
+      <h3>Grupos activos</h3>
+      <div id="lista-grupos"><p style="color:var(--text-sub);font-size:13px;">Cargando...</p></div>
+    </div>
+    <div class="card" style="margin-bottom:0;">
+      <div id="panel"><div class="empty-state">Selecciona un grupo de la lista para gestionar sus materias y horarios.</div></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+let _grupoId=null,_grupoNombre='',_docentes=[],_materias=[],_mgCache={};
+window.onload=async()=>{
+  renderNavbar('Gestión de Grupos');
+  const[,d,m]=await Promise.all([cargarGrupos(),apiGetDocentes(),apiGetMaterias()]);
+  _docentes=Array.isArray(d)?d:[];
+  _materias=Array.isArray(m)?m:[];
+};
+async function cargarGrupos(){
+  const lista=document.getElementById('lista-grupos');
+  try{
+    const grupos=await apiGetGrupos();
+    lista.innerHTML='';
+    if(!grupos.length){lista.innerHTML='<p style="color:var(--text-sub);font-size:13px;">Sin grupos registrados</p>';return;}
+    grupos.forEach(g=>{
+      const btn=document.createElement('div');
+      btn.className='grupo-btn'+(_grupoId===g.id?' active':'');
+      btn.innerHTML=`<div onclick="seleccionar(${g.id},'${esc(g.nombre)}')" style="flex:1;min-width:0;cursor:pointer;">
+        <div>${g.nombre} <span class="grupo-sub">· Grado ${g.grado} · ${g.turno}</span></div></div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="btn-edit" onclick="event.stopPropagation();editarGrupo(${g.id},'${esc(g.nombre)}',${g.grado},'${g.turno}')">Editar</button>
+          <button class="btn-delete" onclick="event.stopPropagation();eliminarGrupo(${g.id})">Eliminar</button>
+        </div>`;
+      lista.appendChild(btn);
+    });
+  }catch{lista.innerHTML='<p style="color:var(--danger);font-size:13px;">Error al cargar grupos</p>';}
+}
+async function guardarGrupo(){
+  const id=document.getElementById('edit-id').value;
+  const nombre=document.getElementById('f-nombre').value.trim();
+  const grado=document.getElementById('f-grado').value;
+  const turno=document.getElementById('f-turno').value;
+  const errEl=document.getElementById('form-error');
+  errEl.textContent='';
+  if(!nombre||!grado){errEl.textContent='Nombre y grado son requeridos';return;}
+  try{
+    const res=id?await apiEditarGrupo(id,{nombre,grado:parseInt(grado),turno,activo:true}):await apiCrearGrupo({nombre,grado:parseInt(grado),turno});
+    if(res.error){errEl.textContent=res.error;return;}
+    toast('Grupo guardado','ok');limpiarForm();await cargarGrupos();
+  }catch{errEl.textContent='Error al guardar';}
+}
+function editarGrupo(id,nombre,grado,turno){
+  document.getElementById('edit-id').value=id;
+  document.getElementById('f-nombre').value=nombre;
+  document.getElementById('f-grado').value=grado;
+  document.getElementById('f-turno').value=turno;
+  document.getElementById('form-titulo').textContent='Editar Grupo';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+async function eliminarGrupo(id){
+  if(!confirm('¿Desactivar este grupo?'))return;
+  await apiEliminarGrupo(id);
+  if(_grupoId===id){_grupoId=null;_grupoNombre='';document.getElementById('panel').innerHTML='<div class="empty-state">Selecciona un grupo de la lista.</div>';}
+  toast('Grupo eliminado','ok');await cargarGrupos();
+}
+function limpiarForm(){
+  ['edit-id','f-nombre','f-grado'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-turno').value='matutino';
+  document.getElementById('form-titulo').textContent='Nuevo Grupo';
+  document.getElementById('form-error').textContent='';
+}
+async function seleccionar(id,nombre){
+  _grupoId=id;_grupoNombre=nombre;_mgCache={};
+  await cargarGrupos();await cargarPanel();
+}
+async function cargarPanel(){
+  const panel=document.getElementById('panel');
+  panel.innerHTML='<div class="empty-state">Cargando...</div>';
+  let materias=[],horariosTodos=[];
+  try{
+    [materias,horariosTodos]=await Promise.all([apiGetMateriasGrupo(_grupoId).catch(()=>[]),apiGetHorariosGrupo(_grupoId).catch(()=>[])]);
+  }catch{panel.innerHTML='<div class="empty-state">Error al cargar datos del grupo.</div>';return;}
+  const horariosMap={};
+  horariosTodos.forEach(h=>{if(!horariosMap[h.materia_grupo_id])horariosMap[h.materia_grupo_id]=[];horariosMap[h.materia_grupo_id].push(h);});
+  materias.forEach(mg=>{_mgCache[mg.id]={...mg,horarios:horariosMap[mg.id]||[]};});
+  renderPanel(materias);
+}
+function renderPanel(materias){
+  const panel=document.getElementById('panel');panel.innerHTML='';
+  const top=document.createElement('div');top.className='panel-top';
+  top.innerHTML=`<div class="panel-title">${_grupoNombre}</div><button class="btn-primary" onclick="toggleFormAsignar()">+ Asignar materia</button>`;
+  panel.appendChild(top);
+  const fa=document.createElement('div');fa.id='form-asignar';
+  fa.innerHTML=`<div class="row">
+    <select id="sel-mat"><option value="">— Selecciona materia —</option>${_materias.map(m=>`<option value="${m.id}">${m.clave} – ${m.nombre}</option>`).join('')}</select>
+    <select id="sel-doc"><option value="">— Sin docente —</option>${_docentes.map(d=>`<option value="${d.id}">${d.nombre} ${d.apellidos}</option>`).join('')}</select>
+    <button class="btn-primary" onclick="asignarMateria()">Asignar</button>
+    <button class="btn-secondary" onclick="toggleFormAsignar()">Cancelar</button></div>`;
+  panel.appendChild(fa);
+  if(!materias.length){panel.innerHTML+='<div class="empty-state">Sin materias asignadas.<br>Usa "+ Asignar materia" para comenzar.</div>';return;}
+  materias.forEach(mg=>renderMateriaCard(mg.id));
+}
+function renderMateriaCard(mg_id){
+  const panel=document.getElementById('panel');
+  const mg=_mgCache[mg_id];if(!mg)return;
+  const old=document.getElementById(`mg-${mg_id}`);
+  const wasOpen=old?.classList.contains('open');
+  const card=document.createElement('div');
+  card.className='materia-row'+(wasOpen?' open':'');card.id=`mg-${mg_id}`;
+  const docenteActual=mg.docente_id?String(mg.docente_id):'';
+  const docObj=docenteActual?_docentes.find(d=>String(d.id)===docenteActual):null;
+  const docLabel=docObj?`${docObj.nombre} ${docObj.apellidos}`:'Sin docente';
+  const chipsHtml=mg.horarios.length?mg.horarios.map(h=>`<span class="chip">${cap(h.dia_semana)} ${h.hora_inicio}–${h.hora_fin}<button class="chip-x" onclick="quitarHorario(${mg_id},${h.id})">×</button></span>`).join(''):'<span style="font-size:11px;color:var(--text-sub);">Sin horario</span>';
+  card.innerHTML=`
+    <div class="materia-head" onclick="toggleCard(${mg_id})">
+      <div><div class="materia-name">${mg.nombre}</div><div class="materia-meta">${mg.clave} · ${mg.creditos} créditos · ${docLabel}</div></div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn-quitar-mat" onclick="event.stopPropagation();quitarMateria(${mg_id})">Quitar</button>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="materia-chips">${chipsHtml}</div>
+    <div class="materia-body">
+      <div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:8px;">DÍAS</div>
+      <div class="dias-row" id="dias-${mg_id}">
+        <button class="dia-btn" data-dia="lunes" onclick="toggleDia(this)">Lun</button>
+        <button class="dia-btn" data-dia="martes" onclick="toggleDia(this)">Mar</button>
+        <button class="dia-btn" data-dia="miercoles" onclick="toggleDia(this)">Mié</button>
+        <button class="dia-btn" data-dia="jueves" onclick="toggleDia(this)">Jue</button>
+        <button class="dia-btn" data-dia="viernes" onclick="toggleDia(this)">Vie</button>
+      </div>
+      <div class="hora-row">
+        <label>De</label><input type="time" id="hi-${mg_id}" value="08:00">
+        <label>a</label><input type="time" id="hf-${mg_id}" value="09:00">
+        <button class="btn-agregar" onclick="agregarHorarios(${mg_id})">+ Agregar días seleccionados</button>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:6px;">DOCENTE</div>
+      <div class="docente-row">
+        <select id="doc-${mg_id}">
+          <option value="">— Sin docente —</option>
+          ${_docentes.map(d=>`<option value="${d.id}" ${String(d.id)===docenteActual?'selected':''}>${d.nombre} ${d.apellidos}</option>`).join('')}
+        </select>
+        <button class="btn-doc" onclick="guardarDocente(${mg_id})">✓ Guardar</button>
+      </div>
+    </div>`;
+  if(old)old.replaceWith(card);else panel.appendChild(card);
+}
+function toggleCard(mg_id){document.getElementById(`mg-${mg_id}`)?.classList.toggle('open');}
+function toggleFormAsignar(){const f=document.getElementById('form-asignar');f.style.display=f.style.display==='none'?'block':'none';}
+function toggleDia(btn){btn.classList.toggle('sel');}
+async function asignarMateria(){
+  const materia_id=document.getElementById('sel-mat').value;
+  const docente_id=document.getElementById('sel-doc').value||null;
+  if(!materia_id){toast('Selecciona una materia','err');return;}
+  const res=await apiAsignarMateriaGrupo(_grupoId,{materia_id,docente_id});
+  if(res.error){toast(res.error,'err');return;}
+  toast('Materia asignada','ok');
+  document.getElementById('form-asignar').style.display='none';
+  const mat=_materias.find(m=>String(m.id)===String(materia_id));
+  _mgCache[res.id]={...res,nombre:mat?.nombre||'',clave:mat?.clave||'',creditos:mat?.creditos||0,horarios:[]};
+  const ph=document.createElement('div');ph.id=`mg-${res.id}`;
+  document.getElementById('panel').appendChild(ph);
+  renderMateriaCard(res.id);
+}
+async function quitarMateria(mg_id){
+  if(!confirm('¿Quitar esta materia del grupo?'))return;
+  const res=await apiQuitarMateriaGrupo(_grupoId,mg_id);
+  if(res.error){toast(res.error,'err');return;}
+  delete _mgCache[mg_id];document.getElementById(`mg-${mg_id}`)?.remove();toast('Materia quitada','ok');
+}
+async function agregarHorarios(mg_id){
+  const dias=[...document.querySelectorAll(`#dias-${mg_id} .dia-btn.sel`)].map(b=>b.dataset.dia);
+  const hora_inicio=document.getElementById(`hi-${mg_id}`).value;
+  const hora_fin=document.getElementById(`hf-${mg_id}`).value;
+  if(!dias.length){toast('Selecciona al menos un día','err');return;}
+  if(!hora_inicio||!hora_fin){toast('Ingresa hora de inicio y fin','err');return;}
+  if(hora_fin<=hora_inicio){toast('La hora fin debe ser mayor a la de inicio','err');return;}
+  let ok=0,skip=0;
+  for(const dia_semana of dias){
+    const res=await apiAgregarHorario(_grupoId,mg_id,{dia_semana,hora_inicio,hora_fin});
+    if(res.error)skip++;else{_mgCache[mg_id].horarios.push(res);ok++;}
+  }
+  document.querySelectorAll(`#dias-${mg_id} .dia-btn`).forEach(b=>b.classList.remove('sel'));
+  renderMateriaCard(mg_id);document.getElementById(`mg-${mg_id}`)?.classList.add('open');
+  if(ok&&skip)toast(`${ok} día(s) agregado(s), ${skip} ya existían`,'ok');
+  else if(skip&&!ok)toast('Esos horarios ya existen','err');
+  else toast(`${ok} día(s) de horario agregado(s)`,'ok');
+}
+async function quitarHorario(mg_id,h_id){
+  await apiEliminarHorario(_grupoId,mg_id,h_id);
+  _mgCache[mg_id].horarios=_mgCache[mg_id].horarios.filter(h=>h.id!==h_id);
+  renderMateriaCard(mg_id);document.getElementById(`mg-${mg_id}`)?.classList.add('open');
+}
+async function guardarDocente(mg_id){
+  const docente_id=document.getElementById(`doc-${mg_id}`).value||null;
+  const res=await apiActualizarDocenteGrupo(_grupoId,mg_id,docente_id);
+  if(res.error){toast(res.error,'err');return;}
+  _mgCache[mg_id].docente_id=docente_id?parseInt(docente_id):null;
+  renderMateriaCard(mg_id);document.getElementById(`mg-${mg_id}`)?.classList.add('open');
+  toast('Docente guardado','ok');
+}
+function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
+function esc(s){return String(s).replace(/'/g,"\\'");}
+let _tt;
+function toast(msg,tipo){
+  const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+tipo;el.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>

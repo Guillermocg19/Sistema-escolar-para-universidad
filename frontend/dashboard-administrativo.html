@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Administrativo</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .welcome-banner{
+      background:linear-gradient(135deg,#1C2B4A 0%,#1558B0 100%);
+      border-radius:16px;padding:28px 32px;margin-bottom:24px;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .welcome-text h3{font-size:20px;font-weight:700;color:#fff;margin:0 0 4px;}
+    .welcome-text p{font-size:13px;color:rgba(255,255,255,.6);margin:0;}
+    .welcome-chip{
+      background:rgba(255,255,255,.12);color:#fff;
+      padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;
+    }
+    .mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;}
+    .mod-card{
+      background:#fff;border-radius:14px;padding:22px;
+      box-shadow:0 2px 12px rgba(13,43,94,.08);
+      transition:transform .18s,box-shadow .18s;
+    }
+    .mod-card:hover{transform:translateY(-5px);box-shadow:0 12px 28px rgba(13,43,94,.14);}
+    .mod-icon{
+      width:46px;height:46px;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+    }
+    .mod-icon svg{width:22px;height:22px;}
+    .mod-name{font-weight:700;color:#1C2B4A;font-size:15px;margin-bottom:4px;}
+    .mod-desc{font-size:12px;color:#7A90A8;margin-bottom:14px;line-height:1.5;}
+    .mod-link{font-size:13px;font-weight:600;text-decoration:none;}
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Panel Administrativo</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <a href="cambiar-nip.html">Cambiar NIP</a>
+    <button onclick="logout()">Cerrar sesion</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h3>Bienvenido, <span id="welcome-nombre">Administrador</span></h3>
+      <p>Panel de administracion del sistema escolar</p>
+    </div>
+    <div class="welcome-chip">Ciclo 2025-2026</div>
+  </div>
+
+  <div class="mod-grid">
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#EBF2FC;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1558B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="mod-name">Alumnos</div>
+      <div class="mod-desc">Gestion del padron de estudiantes inscritos</div>
+      <a href="gestion-alumnos.html" class="mod-link" style="color:#1558B0;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#E6F4EC;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1A7A3F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      </div>
+      <div class="mod-name">Docentes</div>
+      <div class="mod-desc">Administracion del personal docente activo</div>
+      <a href="gestion-docentes.html" class="mod-link" style="color:#1A7A3F;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#EBF2FC;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1558B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <div class="mod-name">Materias</div>
+      <div class="mod-desc">Catalogo de materias y asignacion a grupos</div>
+      <a href="gestion-materias.html" class="mod-link" style="color:#1558B0;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#FEF3E2;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#8B5A00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <div class="mod-name">Aulas</div>
+      <div class="mod-desc">Control de espacios y salones educativos</div>
+      <a href="gestion-aulas.html" class="mod-link" style="color:#8B5A00;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#E6F4EC;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1A7A3F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+      </div>
+      <div class="mod-name">Carreras</div>
+      <div class="mod-desc">Programas academicos y planes de estudio</div>
+      <a href="gestion-carreras.html" class="mod-link" style="color:#1A7A3F;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#FEF0F0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#DC3545" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1"/>
+          <line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>
+        </svg>
+      </div>
+      <div class="mod-name">Inscripciones</div>
+      <div class="mod-desc">Gestion de inscripciones por periodo</div>
+      <a href="gestion-inscripciones.html" class="mod-link" style="color:#DC3545;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#E0F7FA;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00838F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="mod-name">Grupos</div>
+      <div class="mod-desc">Grupos, materias asignadas y horarios</div>
+      <a href="gestion-grupos.html" class="mod-link" style="color:#00838F;">Gestionar →</a>
+    </div>
+
+    <div class="mod-card">
+      <div class="mod-icon" style="background:#EDE7F6;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6A1B9A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+      </div>
+      <div class="mod-name">Aspirantes</div>
+      <div class="mod-desc">Proceso de admision y conversion a alumnos</div>
+      <a href="panel-aspirantes.html" class="mod-link" style="color:#6A1B9A;">Gestionar →</a>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  var sesion = checkSesion();
+  if (!sesion || sesion.rol !== 'admin') {
+    window.location.href = 'login.html';
+  } else {
+    renderNavbar('Panel Administrativo');
+    var nombreEl = document.getElementById('welcome-nombre');
+    if (nombreEl) nombreEl.textContent = sesion.nombre || sesion.usuario;
+  }
+</script>
+</body>
+</html>

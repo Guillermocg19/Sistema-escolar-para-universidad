@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Aspirante — SII</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .progreso-wrap { margin-bottom:28px; }
+    .progreso-etapas {
+      display:flex; gap:0; overflow-x:auto;
+      background:#fff; border-radius:12px; border:1px solid var(--border);
+      box-shadow:var(--shadow); padding:0;
+    }
+    .etapa {
+      flex:1; min-width:110px; padding:16px 10px; text-align:center;
+      font-size:11px; font-weight:600; color:var(--text-sub);
+      border-right:1px solid var(--border); position:relative;
+    }
+    .etapa:last-child { border-right:none; }
+    .etapa-icon { font-size:20px; margin-bottom:6px; display:block; }
+    .etapa.activa { background:var(--blue-light); color:var(--blue); }
+    .etapa.completada { background:#E6F4EC; color:#1A7A3F; }
+    .etapa.rechazada  { background:#FEE8E8; color:var(--danger); }
+
+    .doc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
+    .doc-card {
+      background:#fff; border-radius:12px; border:2px solid var(--border);
+      padding:18px 14px; text-align:center; cursor:pointer; transition:all .18s;
+    }
+    .doc-card:hover { border-color:var(--blue); transform:translateY(-2px); }
+    .doc-card.subido { border-color:#66bb6a; background:#E6F4EC; }
+    .doc-card.aprobado { border-color:#1A7A3F; background:#E6F4EC; }
+    .doc-card.rechazado { border-color:var(--danger); background:#FEE8E8; }
+    .doc-card.en_revision { border-color:#FFB74D; background:#FFF3E0; }
+    .doc-icon { font-size:32px; margin-bottom:8px; display:block; }
+    .doc-nombre { font-size:12px; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .doc-est { font-size:10px; color:var(--text-sub); }
+
+    .msg-item { padding:14px; border-radius:10px; margin-bottom:10px; }
+    .msg-info { background:var(--blue-light); border-left:4px solid var(--blue); }
+    .msg-exito { background:#E6F4EC; border-left:4px solid #1A7A3F; }
+    .msg-advertencia { background:#FFF3E0; border-left:4px solid #FFB74D; }
+    .msg-error { background:#FEE8E8; border-left:4px solid var(--danger); }
+    .msg-texto { font-size:13px; color:var(--text); }
+    .msg-fecha { font-size:11px; color:var(--text-sub); margin-top:4px; }
+
+    input[type="file"] { display:none; }
+    .upload-btn { cursor:pointer; }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Portal Aspirante</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Bienvenida + estatus -->
+  <div class="card" id="card-bienvenida">
+    <p style="color:var(--text-sub);font-size:13px;">Cargando tu perfil...</p>
+  </div>
+
+  <!-- Progreso -->
+  <div class="card progreso-wrap">
+    <h3>Tu progreso de admisión</h3>
+    <div class="progreso-etapas" id="progreso-etapas"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="mostrarTab('documentos',event)">📄 Mis Documentos</button>
+    <button class="tab-btn"        onclick="mostrarTab('mensajes',event)">💬 Mensajes</button>
+  </div>
+
+  <!-- Documentos -->
+  <div class="tab-content active" id="tab-documentos">
+    <div class="card">
+      <h3>Documentos requeridos</h3>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:20px;">
+        Sube cada documento en formato PDF o imagen. Tamaño máximo 5MB por archivo.
+      </p>
+      <div class="doc-grid" id="doc-grid">
+        <p style="color:var(--text-sub);">Cargando...</p>
+      </div>
+    </div>
+    <!-- Input oculto para subir -->
+    <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png">
+  </div>
+
+  <!-- Mensajes -->
+  <div class="tab-content" id="tab-mensajes">
+    <div class="card">
+      <h3>Mensajes del área de admisiones</h3>
+      <div id="lista-mensajes">
+        <p style="color:var(--text-sub);font-size:13px;">Cargando mensajes...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  const TIPOS_DOC = {
+    acta_nacimiento:   { label:'Acta de Nacimiento', icon:'📜' },
+    curp:              { label:'CURP',                icon:'🪪' },
+    certificado:       { label:'Certificado de estudios', icon:'🎓' },
+    identificacion:    { label:'Identificación oficial', icon:'🪪' },
+    comprobante_pago:  { label:'Comprobante de pago', icon:'💳' },
+    fotografia:        { label:'Fotografía reciente', icon:'📷' }
+  };
+
+  const ETAPAS = [
+    { key:'registrado',           label:'Registrado',          icon:'✅' },
+    { key:'documentos_pendientes',label:'Docs. pendientes',     icon:'📄' },
+    { key:'en_revision',          label:'En revisión',          icon:'🔍' },
+    { key:'pago_validado',        label:'Pago validado',        icon:'💳' },
+    { key:'examen_realizado',     label:'Examen realizado',     icon:'📝' },
+    { key:'aceptado',             label:'Aceptado',             icon:'🎉' },
+  ];
+
+  let sesionGlobal = null;
+  let aspiranteGlobal = null;
+  let tipoDocPendiente = null;
+
+  window.onload = async () => {
+    const sesion = checkSesion();
+    if (!sesion || sesion.rol !== 'aspirante') { window.location.href = 'login.html'; return; }
+    sesionGlobal = sesion;
+    renderNavbar('Portal Aspirante');
+    await cargarPerfil();
+  };
+
+  function mostrarTab(tab, e) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    e.target.classList.add('active');
+    if (tab === 'mensajes') cargarMensajes();
+  }
+
+  async function cargarPerfil() {
+    try {
+      const p = await apiGetMiPerfilAspirante(sesionGlobal.id);
+      aspiranteGlobal = p;
+
+      // Bienvenida
+      const ESTATUS_LABEL = {
+        registrado:'Registrado', documentos_pendientes:'Documentos pendientes',
+        en_revision:'En revisión', pago_validado:'Pago validado',
+        examen_realizado:'Examen realizado', aceptado:'Aceptado', rechazado:'Rechazado'
+      };
+      const colores = {
+        registrado:'var(--blue)', documentos_pendientes:'#E8A020',
+        en_revision:'#7B61FF', pago_validado:'#1A7A3F',
+        examen_realizado:'#1A7A3F', aceptado:'#1A7A3F', rechazado:'var(--danger)'
+      };
+
+      document.getElementById('card-bienvenida').innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="margin-bottom:4px;">Hola, ${p.nombre} ${p.apellido_pat}</h3>
+            <p style="color:var(--text-sub);font-size:13px;">CURP: ${p.curp} | Carrera de interés: ${p.carrera_interes || '—'}</p>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:12px;color:var(--text-sub);margin-bottom:4px;">Estatus actual</div>
+            <span style="background:${colores[p.estatus]||'var(--blue)'};color:#fff;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;">
+              ${ESTATUS_LABEL[p.estatus] || p.estatus}
+            </span>
+          </div>
+        </div>
+        ${p.observaciones_admin ? `<div style="margin-top:14px;padding:12px;background:#FFF3E0;border-radius:8px;border-left:4px solid #FFB74D;font-size:13px;color:var(--text);">
+          <strong>Nota del administrador:</strong> ${p.observaciones_admin}
+        </div>` : ''}
+        ${p.estatus === 'aceptado' ? `<div style="margin-top:14px;padding:16px;background:#E6F4EC;border-radius:10px;text-align:center;">
+          <div style="font-size:24px;margin-bottom:8px;">🎉</div>
+          <strong style="color:#1A7A3F;font-size:15px;">¡Felicidades! Has sido aceptado.</strong>
+          <p style="color:#555;font-size:13px;margin-top:4px;">Recibirás tus credenciales de alumno por los canales oficiales.</p>
+        </div>` : ''}`;
+
+      renderProgreso(p.estatus);
+      await cargarDocumentos();
+    } catch (err) {
+      document.getElementById('card-bienvenida').innerHTML =
+        '<p style="color:var(--danger);">Error al cargar perfil.</p>';
+    }
+  }
+
+  function renderProgreso(estatusActual) {
+    const contenedor = document.getElementById('progreso-etapas');
+    const idx = ETAPAS.findIndex(e => e.key === estatusActual);
+    contenedor.innerHTML = ETAPAS.map((et, i) => {
+      let cls = '';
+      if (estatusActual === 'rechazado') cls = i === 0 ? 'completada' : (i === idx ? 'rechazada' : '');
+      else if (i < idx) cls = 'completada';
+      else if (i === idx) cls = 'activa';
+      return `<div class="etapa ${cls}"><span class="etapa-icon">${et.icon}</span>${et.label}</div>`;
+    }).join('');
+  }
+
+  async function cargarDocumentos() {
+    if (!aspiranteGlobal) return;
+    const grid = document.getElementById('doc-grid');
+    try {
+      const docs = await apiGetDocumentosAspirante(aspiranteGlobal.id);
+      const docMap = {};
+      docs.forEach(d => { docMap[d.tipo_documento] = d; });
+
+      grid.innerHTML = Object.entries(TIPOS_DOC).map(([tipo, info]) => {
+        const doc = docMap[tipo];
+        let cls = '', estTxt = 'Sin subir', obs = '';
+        if (doc) {
+          cls = doc.estatus === 'aprobado' ? 'aprobado'
+              : doc.estatus === 'rechazado' ? 'rechazado'
+              : doc.estatus === 'en_revision' ? 'en_revision' : 'subido';
+          estTxt = { pendiente:'Subido – pendiente', en_revision:'En revisión',
+                     aprobado:'✅ Aprobado', rechazado:'❌ Rechazado' }[doc.estatus];
+          if (doc.observaciones) obs = `<div style="font-size:10px;color:#c62828;margin-top:4px;">${doc.observaciones}</div>`;
+        }
+        return `<div class="doc-card ${cls} upload-btn" onclick="abrirSubida('${tipo}')" title="${doc ? 'Haz clic para reemplazar' : 'Haz clic para subir'}">
+          <span class="doc-icon">${info.icon}</span>
+          <div class="doc-nombre">${info.label}</div>
+          <div class="doc-est">${estTxt}</div>
+          ${obs}
+        </div>`;
+      }).join('');
+
+    } catch {
+      grid.innerHTML = '<p style="color:var(--danger);">Error al cargar documentos.</p>';
+    }
+  }
+
+  function abrirSubida(tipo) {
+    if (aspiranteGlobal.estatus === 'aceptado') return;
+    tipoDocPendiente = tipo;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-input').click();
+  }
+
+  document.getElementById('file-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file || !tipoDocPendiente) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo es mayor a 5MB. Elige un archivo más pequeño.'); return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result; // data:mime;base64,xxxx
+      try {
+        const res = await apiSubirDocumento({
+          aspirante_id: aspiranteGlobal.id,
+          tipo_documento: tipoDocPendiente,
+          nombre_archivo: file.name,
+          contenido_b64: base64,
+          mime_type: file.type
+        });
+        if (res.id) {
+          await cargarDocumentos();
+          await cargarPerfil();
+        } else {
+          alert(res.message || 'Error al subir documento');
+        }
+      } catch { alert('Error de conexión'); }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  async function cargarMensajes() {
+    if (!aspiranteGlobal) return;
+    const lista = document.getElementById('lista-mensajes');
+    try {
+      const msgs = await apiGetMensajesAspirante(aspiranteGlobal.id);
+      if (!msgs.length) {
+        lista.innerHTML = '<p style="color:var(--text-sub);font-size:13px;">No tienes mensajes aún.</p>';
+        return;
+      }
+      lista.innerHTML = msgs.map(m => `
+        <div class="msg-item msg-${m.tipo}">
+          <div class="msg-texto">${m.mensaje}</div>
+          <div class="msg-fecha">${m.autor_nombre ? 'De: ' + m.autor_nombre + ' — ' : ''}${new Date(m.creado_en).toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>`).join('');
+    } catch {
+      lista.innerHTML = '<p style="color:var(--danger);">Error al cargar mensajes.</p>';
+    }
+  }
+</script>
+</body>
+</html> 

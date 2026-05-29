@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion de Inscripciones</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <button class="navbar-back" onclick="history.back()">&#8592;</button>
+    <h2 id="navbar-titulo">Inscripciones</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesion</button>
+  </div>
+</div>
+<div class="container">
+  <div class="tab-pills">
+    <button id="tab-individual" class="tab-pill active" onclick="mostrarTab('individual')">Inscripcion Individual</button>
+    <button id="tab-grupo"      class="tab-pill"        onclick="mostrarTab('grupo')">Por Grupo Completo</button>
+  </div>
+  <div id="panel-individual" class="card" style="margin-bottom:20px;">
+    <h3>Inscribir Alumno</h3>
+    <div class="form-row-grid">
+      <div class="form-field"><label>Alumno</label><select id="sel-alumno"><option value="">Seleccionar alumno...</option></select></div>
+      <div class="form-field"><label>Grupo</label><select id="sel-grupo-ind" onchange="cargarMateriasGrupoInd()"><option value="">Seleccionar grupo...</option></select></div>
+      <div class="form-field"><label>Materia-Grupo</label><select id="sel-mg"><option value="">Primero elige grupo...</option></select></div>
+      <div class="form-field form-field-sm"><label>Periodo</label><input id="inp-periodo-ind" value="2026-1"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="inscribirAlumno()">Inscribir</button>
+      <span id="msg-ind" style="font-size:13px;margin-left:8px;"></span>
+    </div>
+  </div>
+  <div id="panel-grupo" class="card" style="margin-bottom:20px;display:none;">
+    <h3>Inscribir Grupo Completo</h3>
+    <div class="form-row">
+      <div class="form-field form-field-md"><label>Grupo</label><select id="sel-grupo-masa" onchange="cargarMateriasGrupoMasa()"><option value="">Seleccionar grupo...</option></select></div>
+      <div class="form-field form-field-sm"><label>Periodo</label><input id="inp-periodo-masa" value="2026-1"></div>
+    </div>
+    <div id="lista-materias-masa" style="margin-top:14px;"></div>
+    <div class="form-actions" style="margin-top:14px;">
+      <button class="btn-primary" onclick="inscribirGrupo()">Inscribir Todo el Grupo</button>
+      <span id="msg-masa" style="font-size:13px;margin-left:8px;"></span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="periodo-selector">
+      <h3 style="margin:0;">Inscripciones Registradas</h3>
+      <input id="filtro-periodo" placeholder="Periodo (ej: 2026-1)" value="2026-1">
+      <button class="btn-primary" onclick="cargarInscripciones()">Filtrar</button>
+    </div>
+    <table class="tabla">
+      <thead><tr><th>Matricula</th><th>Alumno</th><th>Materia</th><th>Grupo</th><th>Periodo</th><th>Estado</th><th>Accion</th></tr></thead>
+      <tbody id="tbody-inscripciones"><tr><td colspan="7">Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-inscripciones.js"></script>
+<script>
+  const sesion=checkSesion();
+  if(!sesion||sesion.rol!=='admin')window.location.href='login.html';
+  renderNavbar('Inscripciones');
+  window.onload=init;
+</script>
+</body>
+</html>

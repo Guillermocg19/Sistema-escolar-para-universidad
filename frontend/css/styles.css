@@ -1,38 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+:root {
+  --navy:       #1C2B4A;
+  --blue:       #1558B0;
+  --blue-dark:  #0D2B5E;
+  --blue-light: #EBF2FC;
+  --blue-mid:   #C8D8F0;
+  --bg:         #EDEEF3;
+  --white:      #ffffff;
+  --text:       #1C2B4A;
+  --text-sub:   #7A90A8;
+  --border:     #DDE6F2;
+  --input-bg:   #F5F8FD;
+  --danger:     #DC3545;
+  --success:    #198754;
+  --shadow:     0 2px 12px rgba(13,43,94,0.08);
+  --radius:     10px;
+  --font:       'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: Arial;
-  background: #f4f4f4;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ══ LOGIN ══ */
 .login-container {
-  width: 300px;
-  margin: 100px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
+  width: 360px;
+  margin: 80px auto;
+  padding: 36px 32px;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+  text-align: center;
 }
-
-input {
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
+.login-logo { font-size: 48px; margin-bottom: 10px; }
+.login-container h2 { font-size: 22px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+.login-subtitle { color: var(--text-sub); font-size: 13px; margin-bottom: 24px; }
+.login-container input {
+  width: 100%; margin: 7px 0; padding: 0 14px; height: 42px;
+  border: 1.5px solid var(--border); border-radius: 9px; font-size: 13px;
+  font-family: var(--font); background: var(--input-bg); color: var(--text);
+  text-align: left; outline: none; transition: border .18s, background .18s;
 }
-
-button {
-  width: 100%;
-  padding: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
+.login-container input:focus { border-color: var(--blue); background: var(--white); }
+.login-container input::placeholder { color: #B0BDD0; }
+.login-container button {
+  width: 100%; margin-top: 16px; height: 42px; padding: 0;
+  background: var(--blue); color: var(--white); border: none; border-radius: 9px;
+  font-size: 14px; font-weight: 700; font-family: var(--font); cursor: pointer;
+  letter-spacing: .02em; transition: background .18s, transform .15s;
 }
+.login-container button:hover { background: #0D459A; transform: translateY(-1px); }
+.login-container button:active { transform: translateY(0); }
+#error { margin-top: 14px; color: var(--danger); font-size: 12px; min-height: 18px; }
 
+/* ══ NAVBAR ══ */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  background: #333;
-  color: white;
-  padding: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--navy); color: white;
+  padding: 0 28px; height: 54px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  position: sticky; top: 0; z-index: 100;
 }
+.navbar-left { display: flex; align-items: center; gap: 12px; }
+.navbar-right { display: flex; align-items: center; gap: 14px; }
+.navbar h2 { font-size: 15px; font-weight: 700; color: white; }
+.navbar a { color: rgba(255,255,255,0.82); font-size: 13px; text-decoration: none; transition: color .15s; }
+.navbar a:hover { color: white; }
+.user-info { font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 500; }
+.navbar button {
+  height: 34px; padding: 0 14px; background: transparent;
+  color: rgba(255,255,255,0.7); border: 1.5px solid rgba(255,255,255,0.22);
+  border-radius: 7px; font-size: 12px; font-weight: 600;
+  font-family: var(--font); cursor: pointer; transition: all .15s; width: auto;
+}
+.navbar button:hover { border-color: rgba(255,255,255,0.6); color: white; }
 
-.container {
-  padding: 20px;
+/* ══ ROL BADGE ══ */
+.rol-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
 }
+.rol-alumno         { background: rgba(255,255,255,0.15); color: white; }
+.rol-docente        { background: rgba(255,255,255,0.15); color: white; }
+.rol-administrativo,
+.rol-admin          { background: rgba(255,255,255,0.15); color: white; }
+
+/* ══ CONTENEDOR PRINCIPAL ══ */
+.container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+.container h3 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.container p { color: var(--text-sub); font-size: 13px; line-height: 1.6; }

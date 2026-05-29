@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Calificaciones</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Mis Calificaciones</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <a href="cambiar-nip.html" class="navbar-link">Cambiar NIP</a>
+    <a href="dashboard-alumno.html" class="navbar-link">Mi portal</a>
+    <button onclick="logout()">Cerrar sesion</button>
+  </div>
+</div>
+<div class="container">
+  <div class="periodo-selector">
+    <label for="sel-periodo">Periodo:</label>
+    <input type="text" id="sel-periodo" placeholder="ej: 2026-1" value="2026-1">
+    <button class="btn-primary" onclick="cargarCalificaciones()">Consultar</button>
+  </div>
+  <div class="resumen-bar" id="resumen-bar" style="display:none;">
+    <div class="resumen-item"><div class="resumen-num" id="res-total">—</div><div class="resumen-lbl">Materias Inscritas</div></div>
+    <div class="resumen-item"><div class="resumen-num verde" id="res-aprobadas">—</div><div class="resumen-lbl">Aprobadas</div></div>
+    <div class="resumen-item"><div class="resumen-num rojo" id="res-reprobadas">—</div><div class="resumen-lbl">Reprobadas</div></div>
+    <div class="resumen-item"><div class="resumen-num" id="res-promedio">—</div><div class="resumen-lbl">Promedio General</div></div>
+  </div>
+  <div class="card">
+    <h3 id="titulo-tabla">Calificaciones del Periodo</h3>
+    <table class="tabla">
+      <thead><tr><th>Materia</th><th>Grupo</th><th>Docente</th><th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th><th>Promedio Final</th><th>Estado</th></tr></thead>
+      <tbody id="tbody-calificaciones"><tr><td colspan="8">Selecciona un periodo y presiona Consultar.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  let sesion=null;
+  window.onload=async()=>{
+    sesion=checkSesion();
+    if(!sesion||sesion.rol!=='alumno'){window.location.href='login.html';return;}
+    renderNavbar('Mis Calificaciones'); await cargarCalificaciones();
+  };
+  async function cargarCalificaciones(){
+    const periodo=document.getElementById('sel-periodo').value.trim();
+    const tbody=document.getElementById('tbody-calificaciones');
+    tbody.innerHTML='<tr><td colspan="8">Cargando...</td></tr>';
+    document.getElementById('resumen-bar').style.display='none';
+    try{
+      const token=localStorage.getItem('token');
+      const q=periodo?`?periodo=${encodeURIComponent(periodo)}`:'';
+      const r=await fetch(`${API_URL}/calificaciones/usuario/${sesion.id}${q}`,{headers:{'Authorization':'Bearer '+token}});
+      const datos=await r.json();
+      if(!Array.isArray(datos)||!datos.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--text-sub)">No tienes calificaciones para el periodo <strong>${periodo||'seleccionado'}</strong>.</td></tr>`;return;}
+      document.getElementById('titulo-tabla').textContent=`Calificaciones — Periodo ${datos[0].periodo}`;
+      tbody.innerHTML='';
+      let sumP=0,countP=0,aprob=0,reprob=0;
+      datos.forEach(d=>{
+        const fmtCal=val=>val!==null?`<span class="cal-num">${parseFloat(val).toFixed(1)}</span>`:`<span class="cal-vacia">—</span>`;
+        const np=d.parciales_registrados||0;
+        const pc=d.promedio_final!==null?(d.promedio_final>=60?'aprobado':'reprobado'):'';
+        const pt=d.promedio_final!==null?`<span class="promedio-chip ${pc}">${parseFloat(d.promedio_final).toFixed(2)}</span> <small style="color:var(--text-sub)">${np}/3</small>`:`<span class="promedio-chip">— <small style="color:var(--text-sub)">${np}/3</small></span>`;
+        if(d.promedio_final!==null){sumP+=parseFloat(d.promedio_final);countP++;if(d.estado==='aprobado')aprob++;if(d.estado==='reprobado')reprob++;}
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><strong>${d.clave}</strong> — ${d.materia}</td><td>${d.grupo}</td><td>${d.docente}</td><td>${fmtCal(d.parcial1)}</td><td>${fmtCal(d.parcial2)}</td><td>${fmtCal(d.parcial3)}</td><td>${pt}</td><td><span class="badge badge-${d.estado}">${d.estado}</span></td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('resumen-bar').style.display='flex';
+      document.getElementById('res-total').textContent=datos.length;
+      document.getElementById('res-aprobadas').textContent=aprob;
+      document.getElementById('res-reprobadas').textContent=reprob;
+      document.getElementById('res-promedio').textContent=countP?(sumP/countP).toFixed(2):'—';
+    }catch(e){tbody.innerHTML='<tr><td colspan="8">Error al cargar calificaciones.</td></tr>';console.error(e);}
+  }
+</script>
+</body>
+</html>

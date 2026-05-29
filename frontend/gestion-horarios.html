@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Horarios</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .horario-grid {
+      display: grid;
+      grid-template-columns: 100px repeat(5, 1fr);
+      gap: 3px;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    .hg-header {
+      background: var(--blue);
+      color: white;
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .hg-hora {
+      background: var(--blue-light);
+      color: var(--blue);
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hg-celda {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      min-height: 64px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .hg-celda:hover { background: var(--blue-light); }
+    .hg-celda.ocupado {
+      background: #e3f2fd;
+      border-color: #90caf9;
+      cursor: default;
+    }
+    .hg-celda .mat-nombre { font-weight: 700; color: var(--blue); font-size: 11px; }
+    .hg-celda .mat-info   { color: #666; font-size: 10px; margin-top: 2px; }
+    .hg-celda .btn-quitar {
+      margin-top: 4px;
+      padding: 2px 6px;
+      background: #fce4ec;
+      color: #c62828;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .filtros { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px; }
+    .filtros select, .filtros input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--font);
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Horarios</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <button class="btn-secondary" style="margin-bottom:20px;" onclick="history.back()">← Regresar</button>
+
+  <!-- Formulario de asignación -->
+  <div class="card">
+    <h3>Asignar Horario a Materia-Grupo</h3>
+    <div class="filtros">
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Grupo</label>
+        <select id="sel-grupo" onchange="cargarMateriasGrupoH()">
+          <option value="">Seleccionar grupo...</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Materia-Grupo</label>
+        <select id="sel-mg-h">
+          <option value="">Primero elige grupo...</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Día</label>
+        <select id="sel-dia">
+          <option value="">Seleccionar...</option>
+          <option value="lunes">Lunes</option>
+          <option value="martes">Martes</option>
+          <option value="miercoles">Miércoles</option>
+          <option value="jueves">Jueves</option>
+          <option value="viernes">Viernes</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Hora inicio</label>
+        <input type="time" id="inp-hora-inicio" step="3600">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Hora fin</label>
+        <input type="time" id="inp-hora-fin" step="3600">
+      </div>
+      <div>
+        <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Aula</label>
+        <select id="sel-aula-h">
+          <option value="">Sin aula</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="guardarHorario()">Guardar</button>
+    </div>
+    <p id="horario-error" class="form-error"></p>
+    <p id="horario-exito" style="color:#2e7d32; font-size:13px;"></p>
+  </div>
+
+  <!-- Vista cuadrícula de horarios -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
+      <h3 style="margin:0;">Horario General</h3>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <label style="font-size:13px;">Filtrar por grupo:</label>
+        <select id="sel-filtro-grupo" onchange="renderHorario()" style="padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;">
+          <option value="">Todos</option>
+        </select>
+      </div>
+    </div>
+    <div id="horario-grid-contenedor">
+      <p style="color:#666; font-size:13px;">Cargando horarios...</p>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  const DIAS       = ['lunes','martes','miercoles','jueves','viernes'];
+  const DIAS_LABEL = { lunes:'Lunes', martes:'Martes', miercoles:'Miércoles', jueves:'Jueves', viernes:'Viernes' };
+  const HORAS      = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+
+  let todosHorarios = [];
+
+  window.onload = async () => {
+    const sesion = checkSesion();
+    if (!sesion || sesion.rol !== 'admin') { window.location.href = 'login.html'; return; }
+    renderNavbar('Gestión de Horarios');
+    await Promise.all([cargarGruposH(), cargarAulasH(), cargarHorarios()]);
+  };
+
+  async function cargarGruposH() {
+    const grupos = await apiGetGrupos();
+    const selG = document.getElementById('sel-grupo');
+    const selF = document.getElementById('sel-filtro-grupo');
+    grupos.forEach(g => {
+      [selG, selF].forEach(sel => {
+        const o = document.createElement('option');
+        o.value = g.id; o.textContent = `${g.nombre} (${g.turno})`;
+        sel.appendChild(o);
+      });
+    });
+  }
+
+  async function cargarAulasH() {
+    const aulas = await apiGetAulas();
+    const sel = document.getElementById('sel-aula-h');
+    aulas.forEach(a => {
+      const o = document.createElement('option');
+      o.value = a.id; o.textContent = `${a.numero}${a.edificio ? ' – ' + a.edificio : ''}`;
+      sel.appendChild(o);
+    });
+  }
+
+  async function cargarMateriasGrupoH() {
+    const grupo_id = document.getElementById('sel-grupo').value;
+    const sel = document.getElementById('sel-mg-h');
+    sel.innerHTML = '<option value="">Cargando...</option>';
+    if (!grupo_id) { sel.innerHTML = '<option value="">Primero elige grupo...</option>'; return; }
+    const materias = await apiGetMateriasGrupo(grupo_id);
+    sel.innerHTML = '<option value="">Seleccionar materia...</option>';
+    materias.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.id; o.textContent = `${m.clave} – ${m.nombre}`;
+      sel.appendChild(o);
+    });
+  }
+
+  async function cargarHorarios() {
+    try {
+      todosHorarios = await apiGetTodosHorarios();
+      renderHorario();
+    } catch {
+      document.getElementById('horario-grid-contenedor').innerHTML =
+        '<p style="color:#c62828;">Error al cargar horarios.</p>';
+    }
+  }
+
+  function renderHorario() {
+    const filtroGrupo = document.getElementById('sel-filtro-grupo').value;
+    const datos = filtroGrupo
+      ? todosHorarios.filter(h => String(h.grupo_id) === filtroGrupo)
+      : todosHorarios;
+    const conHorario = datos.filter(h => h.dia_semana && h.hora_inicio);
+
+    const contenedor = document.getElementById('horario-grid-contenedor');
+    if (conHorario.length === 0) {
+      contenedor.innerHTML = '<p style="color:#666; font-size:13px;">No hay horarios asignados aún. Usa el formulario de arriba para agregar.</p>';
+      return;
+    }
+
+    let html = '<div class="horario-grid">';
+    html += '<div class="hg-header">Hora</div>';
+    DIAS.forEach(d => html += `<div class="hg-header">${DIAS_LABEL[d]}</div>`);
+
+    HORAS.forEach(hora => {
+      html += `<div class="hg-hora">${hora}</div>`;
+      DIAS.forEach(dia => {
+        const clase = conHorario.find(h =>
+          h.dia_semana === dia && h.hora_inicio && h.hora_inicio.slice(0,5) === hora
+        );
+        if (clase) {
+          html += `<div class="hg-celda ocupado">
+            <div class="mat-nombre">${clase.clave}</div>
+            <div class="mat-info">${clase.materia}</div>
+            <div class="mat-info">${clase.grupo}</div>
+            <div class="mat-info">${clase.aula ? '🏫 ' + clase.aula : ''}</div>
+            <button class="btn-quitar" onclick="quitarHorario(${clase.mg_id})">✕ Quitar</button>
+          </div>`;
+        } else {
+          html += '<div class="hg-celda"></div>';
+        }
+      });
+    });
+
+    html += '</div>';
+    contenedor.innerHTML = html;
+  }
+
+  async function guardarHorario() {
+    const mg_id      = document.getElementById('sel-mg-h').value;
+    const dia        = document.getElementById('sel-dia').value;
+    const hora_ini   = document.getElementById('inp-hora-inicio').value;
+    const hora_fin   = document.getElementById('inp-hora-fin').value;
+    const aula_id    = document.getElementById('sel-aula-h').value || null;
+    const errEl      = document.getElementById('horario-error');
+    const exitoEl    = document.getElementById('horario-exito');
+    errEl.textContent = ''; exitoEl.textContent = '';
+
+    if (!mg_id || !dia || !hora_ini || !hora_fin) {
+      errEl.textContent = 'Selecciona materia, día y horas'; return;
+    }
+
+    try {
+      const materia_id = document.getElementById('sel-mg-h')
+        .options[document.getElementById('sel-mg-h').selectedIndex].dataset?.materia_id;
+
+      const r = await fetch(`${API_URL}/materias/grupos/${mg_id}/horario`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ dia_semana: dia, hora_inicio: hora_ini, hora_fin: hora_fin, aula_id })
+      });
+      const data = await r.json();
+      if (!r.ok) { errEl.textContent = data.message || 'Error al guardar'; return; }
+      exitoEl.textContent = '✓ Horario guardado correctamente';
+      await cargarHorarios();
+    } catch {
+      errEl.textContent = 'Error de conexión';
+    }
+  }
+
+  async function quitarHorario(mg_id) {
+    if (!confirm('¿Quitar el horario de esta materia-grupo?')) return;
+    try {
+      await fetch(`${API_URL}/materias/grupos/${mg_id}/horario`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ dia_semana: null, hora_inicio: null, hora_fin: null, aula_id: null })
+      });
+      await cargarHorarios();
+    } catch { alert('Error al quitar horario'); }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Portal Alumno</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);flex-wrap:wrap}
+    .tab-btn{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font);color:var(--text-sub);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+    .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .horario-grid{display:grid;grid-template-columns:72px repeat(5,1fr);gap:3px;font-size:12px;overflow-x:auto}
+    .h-header{background:var(--blue);color:white;padding:8px;text-align:center;border-radius:6px;font-weight:700}
+    .h-hora{background:var(--blue-light);color:var(--blue);padding:8px;text-align:center;border-radius:6px;font-weight:600;font-size:11px;display:flex;align-items:center;justify-content:center}
+    .h-cell{padding:8px;border-radius:6px;border:1px solid var(--border);background:white;min-height:56px;font-size:11px}
+    .h-cell.occ{background:var(--blue-light);border-color:#90caf9}
+    .h-cell .mn{font-weight:700;color:var(--blue)}.h-cell .mi{color:#666;font-size:10px;margin-top:2px}
+    .chip-ap{background:#e8f5e9;color:#2e7d32}.chip-rep{background:#fce4ec;color:#c62828}.chip-vac{background:var(--blue-light);color:#666}
+    .promedio-chip{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px}
+    .ret-resumen{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+    .ret-card{border-radius:10px;padding:16px;text-align:center}
+    .ret-card .num{font-size:28px;font-weight:700}.ret-card .lbl{font-size:12px;margin-top:4px}
+    .ret-ap{background:#e8f5e9;color:#2e7d32}.ret-cur{background:#e3f2fd;color:#1565c0}
+    .ret-rep{background:#fce4ec;color:#c62828}.ret-pen{background:#f5f5f5;color:#555}
+    .ret-cred{background:#fff8e1;color:#e65100}
+    .progress-bar-wrap{height:12px;background:#eee;border-radius:6px;margin:12px 0 20px;overflow:hidden}
+    .progress-bar{height:100%;background:linear-gradient(90deg,#43a047,#66bb6a);border-radius:6px;transition:width .5s}
+    .ret-section{margin-bottom:20px}
+    .ret-section h4{font-size:13px;font-weight:700;margin-bottom:8px;padding:6px 10px;border-radius:6px}
+    .ret-section.ap h4{background:#e8f5e9;color:#2e7d32}.ret-section.cur h4{background:#e3f2fd;color:#1565c0}
+    .ret-section.rep h4{background:#fce4ec;color:#c62828}.ret-section.pen h4{background:#f5f5f5;color:#555}
+    .ret-materia-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:6px;margin-bottom:4px;background:white;border:1px solid var(--border);font-size:13px}
+    .ret-materia-row .clave{font-size:11px;color:var(--text-sub)}
+    .ret-badge{padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700}
+    @media print{.navbar,.tabs,.no-print{display:none!important}.tab-content{display:block!important}}
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Portal Alumno</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <a href="cambiar-nip.html" style="color:white;font-size:13px;text-decoration:none;opacity:.9;">🔑 Cambiar NIP</a>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+<div class="container">
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="mostrarTab('materias',event)">📚 Mis Materias</button>
+    <button class="tab-btn"        onclick="mostrarTab('horario',event)">🕐 Horario</button>
+    <button class="tab-btn"        onclick="mostrarTab('boleta',event)">📋 Boleta</button>
+    <button class="tab-btn"        onclick="mostrarTab('reticular',event)">📈 Avance Reticular</button>
+  </div>
+  <div class="tab-content active" id="tab-materias">
+    <div class="card">
+      <h3>Mis materias inscritas</h3>
+      <p style="color:#666;margin-bottom:16px;font-size:13px;">Materias asignadas a tu grupo este ciclo escolar.</p>
+      <table class="tabla">
+        <thead><tr><th>Clave</th><th>Materia</th><th>Créditos</th><th>Docente</th><th>Grupo</th><th>Turno</th></tr></thead>
+        <tbody id="tbody-materias"><tr><td colspan="6">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="tab-content" id="tab-horario">
+    <div class="card">
+      <h3>Mi horario semanal</h3>
+      <div id="horario-contenido" style="margin-top:16px;"><p style="color:#666;font-size:13px;">Cargando horario...</p></div>
+      <div style="margin-top:16px;" class="no-print">
+        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimir horario</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-content" id="tab-boleta">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h3 style="margin-bottom:4px;">Boleta de calificaciones</h3>
+          <p id="boleta-info" style="color:#666;font-size:12px;"></p>
+        </div>
+        <button class="btn-secondary no-print" onclick="window.print()">🖨️ Imprimir boleta</button>
+      </div>
+      <table class="tabla">
+        <thead><tr><th>Clave</th><th>Materia</th><th>Créditos</th><th>Parcial 1</th><th>Parcial 2</th><th>Parcial 3</th><th>Promedio</th><th>Docente</th></tr></thead>
+        <tbody id="tbody-boleta"><tr><td colspan="8">Cargando...</td></tr></tbody>
+      </table>
+      <div id="promedio-general" style="margin-top:16px;text-align:right;font-size:14px;font-weight:700;color:var(--blue);"></div>
+    </div>
+  </div>
+  <div class="tab-content" id="tab-reticular">
+    <div class="card">
+      <h3>Avance Reticular</h3>
+      <div id="reticular-contenido"><p style="color:#666;font-size:13px;">Cargando...</p></div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+const DIAS=['lunes','martes','miercoles','jueves','viernes'];
+const DIAS_LABEL={lunes:'Lunes',martes:'Martes',miercoles:'Miércoles',jueves:'Jueves',viernes:'Viernes'};
+const HORAS=['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+let sesion=null,_cacheHorario=null,_cacheBoleta=null,_cacheReticular=null;
+
+window.onload=async()=>{
+  sesion=checkSesion();
+  if(!sesion||sesion.rol!=='alumno'){window.location.href='login.html';return;}
+  renderNavbar('Portal Alumno');
+  await Promise.all([cargarMaterias(),prefetchHorario(),prefetchReticular()]);
+};
+
+function mostrarTab(tab,e){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  e.target.classList.add('active');
+  if(tab==='horario')renderHorario();
+  if(tab==='boleta')cargarBoleta();
+  if(tab==='reticular')renderReticular();
+}
+
+async function cargarMaterias(){
+  const tbody=document.getElementById('tbody-materias');
+  try{
+    const mat=await apiGetMisMateriasAlumno(sesion.id);
+    tbody.innerHTML='';
+    if(!mat.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#999;">No tienes materias asignadas aún.</td></tr>';return;}
+    mat.forEach(m=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${m.clave}</td><td>${m.nombre}</td><td>${m.creditos}</td>
+        <td>${m.docente_nombre?m.docente_nombre+' '+m.docente_apellidos:'—'}</td>
+        <td>${m.grupo}</td><td>${m.turno}</td>`;
+      tbody.appendChild(tr);
+    });
+  }catch{tbody.innerHTML='<tr><td colspan="6">Error al cargar materias</td></tr>';}
+}
+
+async function prefetchHorario(){try{_cacheHorario=await apiGetHorarioAlumno(sesion.id);}catch{}}
+
+function renderHorario(){
+  const c=document.getElementById('horario-contenido');
+  const h=_cacheHorario;
+  if(!h||!h.length||h.every(x=>!x.dia_semana)){
+    c.innerHTML='<p style="color:#666;font-size:13px;">El horario aún no ha sido configurado por el administrador.</p>';return;
+  }
+  let html='<div class="horario-grid">';
+  html+='<div class="h-header">Hora</div>';
+  DIAS.forEach(d=>html+=`<div class="h-header">${DIAS_LABEL[d]}</div>`);
+  HORAS.forEach(hora=>{
+    html+=`<div class="h-hora">${hora}</div>`;
+    DIAS.forEach(dia=>{
+      const clase=h.find(x=>x.dia_semana===dia&&x.hora_inicio&&x.hora_inicio.slice(0,5)===hora);
+      if(clase)html+=`<div class="h-cell occ"><div class="mn">${clase.materia}</div><div class="mi">${clase.docente_nombre?clase.docente_nombre+' '+clase.docente_apellidos:''}</div><div class="mi">${clase.hora_inicio?.slice(0,5)||''} – ${clase.hora_fin?.slice(0,5)||''}</div></div>`;
+      else html+='<div class="h-cell"></div>';
+    });
+  });
+  html+='</div>';c.innerHTML=html;
+}
+
+async function cargarBoleta(){
+  if(_cacheBoleta){renderBoleta(_cacheBoleta);return;}
+  document.getElementById('tbody-boleta').innerHTML='<tr><td colspan="8">Cargando...</td></tr>';
+  try{_cacheBoleta=await apiGetBoletaAlumno(sesion.id);renderBoleta(_cacheBoleta);}
+  catch{document.getElementById('tbody-boleta').innerHTML='<tr><td colspan="8">Error al cargar boleta</td></tr>';}
+}
+
+function renderBoleta(boleta){
+  const tbody=document.getElementById('tbody-boleta');
+  const pg=document.getElementById('promedio-general');
+  const bi=document.getElementById('boleta-info');
+  const user=JSON.parse(localStorage.getItem('user')||'{}');
+  bi.textContent=`Alumno: ${user.nombre||user.usuario} — Periodo: 2026-1`;
+  tbody.innerHTML='';
+  if(!boleta.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#999;">Sin calificaciones registradas aún.</td></tr>';return;}
+  let suma=0,cont=0;
+  boleta.forEach(b=>{
+    const prom=parseFloat(b.promedio_final);
+    let cls='chip-vac',txt='—';
+    if(!isNaN(prom)){cls=prom>=60?'chip-ap':'chip-rep';txt=prom.toFixed(2);suma+=prom;cont++;}
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${b.clave}</td><td>${b.materia}</td><td>${b.creditos}</td>
+      <td>${b.parcial1??'—'}</td><td>${b.parcial2??'—'}</td><td>${b.parcial3??'—'}</td>
+      <td><span class="promedio-chip ${cls}">${txt}</span></td><td>${b.docente??'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  if(cont>0){const v=(suma/cont).toFixed(2);const color=parseFloat(v)>=60?'#2e7d32':'#c62828';pg.innerHTML=`Promedio general: <span style="color:${color};font-size:18px;">${v}</span>`;}
+}
+
+async function prefetchReticular(){try{_cacheReticular=await apiGetReticulaAlumno(sesion.id);}catch{}}
+
+function renderReticular(){
+  const c=document.getElementById('reticular-contenido');
+  const data=_cacheReticular;
+  if(!data){c.innerHTML='<p style="color:#c62828;">Error al cargar avance reticular.</p>';return;}
+  const r=data.resumen;const pct=r.avance_pct||0;
+  c.innerHTML=`
+    <div class="ret-resumen">
+      <div class="ret-card ret-ap"><div class="num">${r.aprobadas}</div><div class="lbl">Aprobadas</div></div>
+      <div class="ret-card ret-cur"><div class="num">${r.en_curso}</div><div class="lbl">En curso</div></div>
+      <div class="ret-card ret-rep"><div class="num">${r.reprobadas}</div><div class="lbl">Reprobadas</div></div>
+      <div class="ret-card ret-pen"><div class="num">${r.pendientes}</div><div class="lbl">Pendientes</div></div>
+      <div class="ret-card ret-cred"><div class="num">${r.creditos_aprobados}/${r.creditos_totales}</div><div class="lbl">Créditos aprobados</div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text-sub);">
+        <span>Avance general</span><span>${pct}%</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    </div>
+    ${secRet('Materias aprobadas',data.aprobadas,'ap',r=>`<span class="ret-badge" style="background:#e8f5e9;color:#2e7d32;">${r.promedio_final?r.promedio_final+' pts':'Aprobada'}</span>`)}
+    ${secRet('En curso',data.en_curso,'cur',r=>`<span class="ret-badge" style="background:#e3f2fd;color:#1565c0;">${r.parciales_registrados}/3 parciales</span>`)}
+    ${secRet('Reprobadas',data.reprobadas,'rep',r=>`<span class="ret-badge" style="background:#fce4ec;color:#c62828;">${r.promedio_final?r.promedio_final+' pts':'Reprobada'}</span>`)}
+    ${secRet('Pendientes (sin inscribir)',data.pendientes,'pen',()=>`<span class="ret-badge" style="background:#f5f5f5;color:#888;">Pendiente</span>`)}`;
+}
+
+function secRet(titulo,items,cls,badgeFn){
+  if(!items.length)return'';
+  return`<div class="ret-section ${cls}"><h4>${titulo} (${items.length})</h4>${items.map(r=>`
+    <div class="ret-materia-row">
+      <div><div>${r.materia}</div><div class="clave">${r.clave} · ${r.creditos} créditos${r.periodo?' · '+r.periodo:''}</div></div>
+      ${badgeFn(r)}
+    </div>`).join('')}</div>`;
+}
+</script>
+</body>
+</html>

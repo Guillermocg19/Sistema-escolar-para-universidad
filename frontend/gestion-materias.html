@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Materias</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Gestión de Materias</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <button class="btn-secondary" style="margin-bottom:20px;" onclick="history.back()">← Regresar</button>
+
+  <!-- Formulario materia -->
+  <div class="card">
+    <h3 id="form-titulo">Nueva Materia</h3>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id">
+      <input type="text"   id="f-clave"       placeholder="Clave (ej. MAT101)">
+      <input type="text"   id="f-nombre"      placeholder="Nombre de la materia">
+      <input type="number" id="f-creditos"    placeholder="Créditos" min="0">
+      <input type="text"   id="f-descripcion" placeholder="Descripción">
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary"   onclick="guardarMateria()">Guardar</button>
+      <button class="btn-secondary" onclick="limpiarForm()">Cancelar</button>
+    </div>
+    <p id="form-error" class="form-error"></p>
+  </div>
+
+  <!-- Tabla materias -->
+  <div class="card">
+    <h3>Materias registradas</h3>
+    <table class="tabla">
+      <thead>
+        <tr><th>Clave</th><th>Nombre</th><th>Créditos</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="tabla-materias"></tbody>
+    </table>
+  </div>
+
+  <!-- Asignación a grupos -->
+  <div class="card" id="card-asignacion" style="display:none;">
+    <h3 id="asignacion-titulo">Asignar grupos</h3>
+    <div class="form-grid">
+      <select id="f-grupo-asignar">
+        <option value="">-- Seleccionar grupo --</option>
+      </select>
+      <select id="f-docente-asignar">
+        <option value="">-- Seleccionar docente (opcional) --</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="asignarGrupo()">Asignar</button>
+      <button class="btn-secondary" onclick="cerrarAsignacion()">Cerrar</button>
+    </div>
+    <p id="asignacion-error" class="form-error"></p>
+    <table class="tabla" style="margin-top:16px;">
+      <thead>
+        <tr><th>Grupo</th><th>Grado</th><th>Turno</th><th>Docente</th><th>Acción</th></tr>
+      </thead>
+      <tbody id="tabla-asignaciones"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-materias.js"></script>
+</body>
+</html>

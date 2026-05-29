@@ -5,11 +5,13 @@ const autorizar = require('../middleware/autorizar');
 
 const SELECT_ALUMNO = `
   SELECT a.id, a.matricula, a.nombre, a.apellidos, a.telefono,
-         a.activo, a.creado_en,
+         a.activo, a.creado_en, a.carrera_id,
+         c.nombre AS carrera_nombre,
          g.id AS grupo_id, g.nombre AS grupo,
          u.id AS usuario_id, u.usuario, u.correo_institucional
   FROM alumnos a
   LEFT JOIN grupos   g ON a.grupo_id   = g.id
+  LEFT JOIN carreras c ON a.carrera_id = c.id
   LEFT JOIN usuarios u ON a.usuario_id = u.id
 `;
 
@@ -86,79 +88,65 @@ router.get('/boleta/:usuario_id', autorizar(['alumno', 'admin']), async (req, re
   }
 });
 
+
 router.get('/reticular/:usuario_id', autorizar(['alumno', 'admin']), async (req, res) => {
+
+  const reticularRouter = require('./reticular');
+  req.params.usuario_id = req.params.usuario_id;
   try {
     const alumnoRes = await pool.query(
-      'SELECT id FROM alumnos WHERE usuario_id = $1 AND activo = TRUE LIMIT 1',
+      `SELECT a.id, a.matricula, a.nombre, a.apellidos, a.carrera_id,
+              c.nombre AS carrera_nombre
+       FROM alumnos a
+       LEFT JOIN carreras c ON a.carrera_id = c.id
+       WHERE a.usuario_id = $1 AND a.activo = TRUE LIMIT 1`,
       [req.params.usuario_id]
     );
     if (!alumnoRes.rows.length)
       return res.status(404).json({ message: 'Alumno no encontrado' });
-    const alumno_id = alumnoRes.rows[0].id;
 
-    const inscritasRes = await pool.query(
-      `SELECT materia_id, clave, materia, creditos, inscripcion_id,
-              periodo, estado, parcial1, parcial2, parcial3,
-              promedio_final, parciales_registrados
-       FROM vista_calificaciones WHERE alumno_id = $1 ORDER BY materia`,
-      [alumno_id]
-    );
-    const inscritas = inscritasRes.rows;
+    const alumno = alumnoRes.rows[0];
 
-    const ids = inscritas.map(r => r.materia_id);
-    let pendientes = [];
-    if (ids.length > 0) {
-      const params = ids.map((_, i) => `$${i + 1}`).join(',');
-      const p = await pool.query(
-        `SELECT id AS materia_id, clave, nombre AS materia, creditos
-         FROM materias WHERE id NOT IN (${params}) AND activo = TRUE ORDER BY nombre`,
-        ids
+    if (!alumno.carrera_id) {
+      const inscritasRes = await pool.query(
+        `SELECT materia_id, clave, materia, creditos, inscripcion_id,
+                periodo, estado, parcial1, parcial2, parcial3,
+                promedio_final, parciales_registrados
+         FROM vista_calificaciones WHERE alumno_id = $1 ORDER BY materia`,
+        [alumno.id]
       );
-      pendientes = p.rows;
-    } else {
-      const p = await pool.query(
-        'SELECT id AS materia_id, clave, nombre AS materia, creditos FROM materias WHERE activo = TRUE ORDER BY nombre'
+      const inscritas = inscritasRes.rows;
+      const aprobadas  = inscritas.filter(r =>
+        r.estado === 'aprobado' ||
+        (r.parciales_registrados >= 3 && parseFloat(r.promedio_final) >= 60)
       );
-      pendientes = p.rows;
+      const reprobadas = inscritas.filter(r =>
+        r.estado === 'reprobado' ||
+        (r.parciales_registrados >= 3 && parseFloat(r.promedio_final) < 60 &&
+         !aprobadas.find(a => a.inscripcion_id === r.inscripcion_id))
+      );
+      const en_curso = inscritas.filter(r =>
+        r.estado === 'inscrito' && r.parciales_registrados < 3 &&
+        !aprobadas.find(a => a.inscripcion_id === r.inscripcion_id) &&
+        !reprobadas.find(a => a.inscripcion_id === r.inscripcion_id)
+      );
+      const bajas = inscritas.filter(r => r.estado === 'baja');
+      const creditosAprobados = aprobadas.reduce((s, r) => s + (parseInt(r.creditos) || 0), 0);
+      const creditosTotales   = inscritas.reduce((s, r) => s + (parseInt(r.creditos) || 0), 0);
+      return res.json({
+        alumno_id: alumno.id,
+        sin_carrera: true,
+        resumen: {
+          aprobadas: aprobadas.length, en_curso: en_curso.length,
+          reprobadas: reprobadas.length, bajas: bajas.length, pendientes: 0,
+          creditos_aprobados: creditosAprobados, creditos_totales: creditosTotales,
+          avance_pct: creditosTotales > 0 ? Math.round((creditosAprobados / creditosTotales) * 100) : 0
+        },
+        aprobadas, en_curso, reprobadas, bajas, pendientes: []
+      });
     }
 
-    const aprobadas = inscritas.filter(r =>
-      r.estado === 'aprobado' ||
-      (r.parciales_registrados >= 3 && parseFloat(r.promedio_final) >= 60)
-    );
-    const reprobadas = inscritas.filter(r =>
-      r.estado === 'reprobado' ||
-      (r.parciales_registrados >= 3 && parseFloat(r.promedio_final) < 60 &&
-       !aprobadas.find(a => a.inscripcion_id === r.inscripcion_id))
-    );
-    const en_curso = inscritas.filter(r =>
-      r.estado === 'inscrito' && r.parciales_registrados < 3 &&
-      !aprobadas.find(a => a.inscripcion_id === r.inscripcion_id) &&
-      !reprobadas.find(a => a.inscripcion_id === r.inscripcion_id)
-    );
-    const bajas = inscritas.filter(r => r.estado === 'baja');
-
-    const creditosAprobados = aprobadas.reduce((s, r) => s + (parseInt(r.creditos) || 0), 0);
-    const creditosTotales   = [...inscritas, ...pendientes].reduce((s, r) => s + (parseInt(r.creditos) || 0), 0);
-
-    res.json({
-      alumno_id,
-      resumen: {
-        aprobadas:  aprobadas.length,
-        en_curso:   en_curso.length,
-        reprobadas: reprobadas.length,
-        bajas:      bajas.length,
-        pendientes: pendientes.length,
-        creditos_aprobados: creditosAprobados,
-        creditos_totales:   creditosTotales,
-        avance_pct: creditosTotales > 0 ? Math.round((creditosAprobados / creditosTotales) * 100) : 0
-      },
-      aprobadas,
-      en_curso,
-      reprobadas,
-      bajas,
-      pendientes: pendientes.map(p => ({ ...p, estado: 'pendiente' }))
-    });
+    res.redirect(`/reticular/alumno/${req.params.usuario_id}`);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -175,7 +163,7 @@ router.get('/:id', autorizar(['admin', 'docente']), async (req, res) => {
 });
 
 router.post('/', autorizar(['admin']), async (req, res) => {
-  const { nombre, apellidos, email, telefono, grupo_id } = req.body;
+  const { nombre, apellidos, email, telefono, grupo_id, carrera_id } = req.body;
   if (!nombre || !apellidos)
     return res.status(400).json({ message: 'nombre y apellidos son requeridos' });
   const client = await pool.connect();
@@ -197,9 +185,9 @@ router.post('/', autorizar(['admin']), async (req, res) => {
     const correo_institucional = `${nombre.split(' ')[0].toLowerCase()}.${apellidos.split(' ')[0].toLowerCase()}@tec.com`;
     await client.query('UPDATE usuarios SET nip=$1, correo_institucional=$2 WHERE id=$3', [nip, correo_institucional, usuario_id]);
     const alumResult = await client.query(
-      `INSERT INTO alumnos (matricula,nombre,apellidos,email,telefono,grupo_id,usuario_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id,matricula,nombre,apellidos`,
-      [matricula, nombre, apellidos, email||null, telefono||null, grupo_id||null, usuario_id]
+      `INSERT INTO alumnos (matricula,nombre,apellidos,email,telefono,grupo_id,carrera_id,usuario_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id,matricula,nombre,apellidos`,
+      [matricula, nombre, apellidos, email||null, telefono||null, grupo_id||null, carrera_id||null, usuario_id]
     );
     await client.query('COMMIT');
     res.status(201).json({ ...alumResult.rows[0], usuario, contrasena_inicial: contrasena, nip, correo_institucional, mensaje: 'Alumno registrado. Guardar estas credenciales.' });
@@ -211,12 +199,13 @@ router.post('/', autorizar(['admin']), async (req, res) => {
 });
 
 router.put('/:id', autorizar(['admin']), async (req, res) => {
-  const { nombre, apellidos, email, telefono, grupo_id, activo } = req.body;
+  const { nombre, apellidos, email, telefono, grupo_id, carrera_id, activo } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE alumnos SET nombre=$1,apellidos=$2,email=$3,telefono=$4,grupo_id=$5,activo=$6
-       WHERE id=$7 RETURNING id,matricula,nombre,apellidos,activo`,
-      [nombre, apellidos, email||null, telefono||null, grupo_id||null, activo??true, req.params.id]
+      `UPDATE alumnos SET nombre=$1,apellidos=$2,email=$3,telefono=$4,
+              grupo_id=$5,carrera_id=$6,activo=$7
+       WHERE id=$8 RETURNING id,matricula,nombre,apellidos,activo,carrera_id`,
+      [nombre, apellidos, email||null, telefono||null, grupo_id||null, carrera_id||null, activo??true, req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: 'Alumno no encontrado' });
     res.json(result.rows[0]);

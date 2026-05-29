@@ -259,3 +259,63 @@ async function apiGetReticular(usuario_id) {
   const r = await fetch(`${API_URL}/alumnos/reticular/${usuario_id}`, { headers: authHeaders() });
   return r.json();
 }
+
+// ── ASPIRANTES ──
+async function apiRegistrarAspirante(datos) {
+  const r = await fetch(`${API_URL}/aspirantes/registro`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+async function apiGetMiPerfilAspirante(usuario_id) {
+  const r = await fetch(`${API_URL}/aspirantes/mi-perfil/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}
+async function apiGetDocumentosAspirante(aspirante_id) {
+  const r = await fetch(`${API_URL}/aspirantes/documentos/${aspirante_id}`, { headers: authHeaders() });
+  return r.json();
+}
+async function apiSubirDocumento(datos) {
+  const r = await fetch(`${API_URL}/aspirantes/documentos`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+async function apiGetMensajesAspirante(aspirante_id) {
+  const r = await fetch(`${API_URL}/aspirantes/mensajes/${aspirante_id}`, { headers: authHeaders() });
+  return r.json();
+}
+async function apiGetAspirantes() {
+  const r = await fetch(`${API_URL}/aspirantes`, { headers: authHeaders() });
+  return r.json();
+}
+async function apiGetAspirante(id) {
+  const r = await fetch(`${API_URL}/aspirantes/${id}`, { headers: authHeaders() });
+  return r.json();
+}
+async function apiCambiarEstatusAspirante(id, datos) {
+  const r = await fetch(`${API_URL}/aspirantes/${id}/estatus`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+async function apiRevisarDocumento(doc_id, datos) {
+  const r = await fetch(`${API_URL}/aspirantes/documentos/${doc_id}/revisar`, {
+    method: 'PATCH', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+async function apiEnviarMensajeAspirante(id, datos) {
+  const r = await fetch(`${API_URL}/aspirantes/${id}/mensaje`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+async function apiConvertirAlumno(id, datos) {
+  const r = await fetch(`${API_URL}/aspirantes/${id}/convertir-alumno`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}

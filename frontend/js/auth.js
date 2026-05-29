@@ -21,6 +21,7 @@ async function login() {
         case 'admin':   window.location.href = 'dashboard-administrativo.html'; break;
         case 'docente': window.location.href = 'dashboard-docente.html'; break;
         case 'alumno':  window.location.href = 'dashboard-alumno.html'; break;
+        case 'aspirante': window.location.href = 'dashboard-aspirante.html'; break;
         default:        window.location.href = 'dashboard.html';
       }
     } else {

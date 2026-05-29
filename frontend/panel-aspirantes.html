@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Aspirantes — SII</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .est-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+    .est-registrado           { background:#EBF2FC; color:var(--blue); }
+    .est-documentos_pendientes{ background:#FEF3E2; color:#8B5A00; }
+    .est-en_revision          { background:#EDE7F6; color:#6A1B9A; }
+    .est-pago_validado        { background:#E6F4EC; color:#1A7A3F; }
+    .est-examen_realizado     { background:#E6F4EC; color:#1A7A3F; }
+    .est-aceptado             { background:#E6F4EC; color:#1A7A3F; }
+    .est-rechazado            { background:#FEE8E8; color:var(--danger); }
+    .doc-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+    .doc-row:last-child { border-bottom:none; }
+    .doc-acciones { display:flex; gap:8px; }
+    .side-panel { display:none; position:fixed; right:0; top:0; width:420px; height:100vh; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,.15); z-index:200; overflow-y:auto; padding:24px; }
+    .side-panel.open { display:block; }
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:199; }
+    .overlay.open { display:block; }
+    .sp-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-sub); }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Panel de Aspirantes</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="cerrarPanel()"></div>
+
+<!-- Panel lateral de detalle -->
+<div class="side-panel" id="side-panel">
+  <button class="sp-close" onclick="cerrarPanel()">×</button>
+  <div id="side-contenido"></div>
+</div>
+
+<div class="container">
+  <button class="btn-secondary" style="margin-bottom:20px;" onclick="history.back()">← Regresar</button>
+
+  <!-- Filtros -->
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <select id="filtro-estatus" onchange="filtrarTabla()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+        <option value="">Todos los estatus</option>
+        <option value="registrado">Registrado</option>
+        <option value="documentos_pendientes">Docs. pendientes</option>
+        <option value="en_revision">En revisión</option>
+        <option value="pago_validado">Pago validado</option>
+        <option value="examen_realizado">Examen realizado</option>
+        <option value="aceptado">Aceptado</option>
+        <option value="rechazado">Rechazado</option>
+      </select>
+      <input id="filtro-buscar" placeholder="Buscar nombre o CURP..." onkeyup="filtrarTabla()"
+        style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;width:220px;">
+      <span id="contador" style="font-size:13px;color:var(--text-sub);margin-left:auto;"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Aspirantes registrados</h3>
+    <table class="tabla" id="tabla-asp">
+      <thead>
+        <tr>
+          <th>Nombre</th><th>CURP</th><th>Carrera</th>
+          <th>Docs</th><th>Estatus</th><th>Fecha</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-asp">
+        <tr><td colspan="7" style="text-align:center;color:var(--text-sub);">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  let todosAspirantes = [];
+  const TIPOS_DOC = {
+    acta_nacimiento:'Acta de Nacimiento', curp:'CURP',
+    certificado:'Certificado', identificacion:'Identificación',
+    comprobante_pago:'Comprobante de pago', fotografia:'Fotografía', otro:'Otro'
+  };
+
+  window.onload = async () => {
+    const sesion = checkSesion();
+    if (!sesion || sesion.rol !== 'admin') { window.location.href = 'login.html'; return; }
+    renderNavbar('Panel de Aspirantes');
+    await cargarAspirantes();
+  };
+
+  async function cargarAspirantes() {
+    try {
+      todosAspirantes = await apiGetAspirantes();
+      filtrarTabla();
+    } catch {
+      document.getElementById('tbody-asp').innerHTML =
+        '<tr><td colspan="7">Error al cargar aspirantes</td></tr>';
+    }
+  }
+
+  function filtrarTabla() {
+    const estFiltro = document.getElementById('filtro-estatus').value;
+    const busq = document.getElementById('filtro-buscar').value.toLowerCase();
+    const datos = todosAspirantes.filter(a => {
+      const matchEst = !estFiltro || a.estatus === estFiltro;
+      const matchBusq = !busq ||
+        `${a.nombre} ${a.apellido_pat}`.toLowerCase().includes(busq) ||
+        a.curp.toLowerCase().includes(busq);
+      return matchEst && matchBusq;
+    });
+    document.getElementById('contador').textContent = `${datos.length} aspirante(s)`;
+    renderTabla(datos);
+  }
+
+  function renderTabla(datos) {
+    const tbody = document.getElementById('tbody-asp');
+    if (!datos.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-sub);">Sin resultados</td></tr>';
+      return;
+    }
+    tbody.innerHTML = datos.map(a => `
+      <tr>
+        <td><strong>${a.nombre} ${a.apellido_pat}</strong></td>
+        <td style="font-size:12px;">${a.curp}</td>
+        <td style="font-size:12px;">${a.carrera_interes || '—'}</td>
+        <td style="text-align:center;">
+          <span style="font-size:13px;font-weight:700;color:${parseInt(a.docs_aprobados)===parseInt(a.total_docs)&&a.total_docs>0?'#1A7A3F':'var(--text-sub)'};">
+            ${a.docs_aprobados}/${a.total_docs}
+          </span>
+        </td>
+        <td><span class="est-badge est-${a.estatus}">${a.estatus.replace('_',' ')}</span></td>
+        <td style="font-size:12px;">${new Date(a.fecha_registro).toLocaleDateString('es-MX')}</td>
+        <td>
+          <button class="btn-edit" onclick="verDetalle(${a.id})">Ver</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function verDetalle(id) {
+    const panel = document.getElementById('side-panel');
+    const overlay = document.getElementById('overlay');
+    const contenido = document.getElementById('side-contenido');
+    contenido.innerHTML = '<p style="color:var(--text-sub);">Cargando...</p>';
+    panel.classList.add('open'); overlay.classList.add('open');
+
+    try {
+      const [asp, docs, grupos] = await Promise.all([
+        apiGetAspirante(id),
+        apiGetDocumentosAspirante(id),
+        apiGetGrupos()
+      ]);
+
+      const ESTATUS_OPT = ['registrado','documentos_pendientes','en_revision',
+        'pago_validado','examen_realizado','aceptado','rechazado'];
+
+      const grupoOpts = grupos.map(g =>
+        `<option value="${g.id}">${g.nombre} (${g.turno})</option>`).join('');
+
+      contenido.innerHTML = `
+        <h3 style="margin-bottom:4px;">${asp.nombre} ${asp.apellido_pat} ${asp.apellido_mat||''}</h3>
+        <p style="color:var(--text-sub);font-size:12px;margin-bottom:20px;">
+          CURP: ${asp.curp} | Tel: ${asp.telefono||'—'} | Correo: ${asp.correo}
+        </p>
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Estatus del proceso</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <select id="sel-estatus-${id}" style="padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
+              ${ESTATUS_OPT.map(e => `<option value="${e}" ${asp.estatus===e?'selected':''}>${e.replace(/_/g,' ')}</option>`).join('')}
+            </select>
+            <textarea id="obs-${id}" placeholder="Observaciones para el aspirante (opcional)"
+              style="padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);resize:vertical;min-height:70px;"
+            >${asp.observaciones_admin||''}</textarea>
+            <button class="btn-primary" onclick="cambiarEstatus(${id})">Guardar estatus</button>
+          </div>
+        </div>
+
+        ${asp.estatus === 'aceptado' ? '' : `
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Convertir a alumno</h3>
+          <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">
+            Asigna un grupo y convierte al aspirante en alumno del sistema.
+          </p>
+          <select id="sel-grupo-${id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:10px;">
+            <option value="">Sin grupo (asignar después)</option>
+            ${grupoOpts}
+          </select>
+          <button class="btn-primary" style="background:#1A7A3F;" onclick="convertirAlumno(${id})">
+            ✅ Convertir a Alumno
+          </button>
+        </div>`}
+
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Documentos (${docs.length})</h3>
+          ${docs.length === 0 ? '<p style="color:var(--text-sub);font-size:13px;">Sin documentos subidos.</p>' :
+            docs.map(d => `
+              <div class="doc-row">
+                <div>
+                  <div style="font-size:13px;font-weight:700;">${TIPOS_DOC[d.tipo_documento]||d.tipo_documento}</div>
+                  <div style="font-size:11px;color:var(--text-sub);">${d.nombre_archivo||'—'}</div>
+                  ${d.observaciones ? `<div style="font-size:11px;color:#c62828;">${d.observaciones}</div>` : ''}
+                  <span class="est-badge est-${d.estatus}" style="margin-top:4px;display:inline-block;">${d.estatus}</span>
+                </div>
+                <div class="doc-acciones">
+                  <button class="btn-edit" onclick="verDocumento(${d.id})">Ver</button>
+                  <button class="btn-primary" style="height:28px;padding:0 10px;font-size:11px;" onclick="revisarDocumento(${d.id},'aprobado')">✅</button>
+                  <button class="btn-delete" style="height:28px;padding:0 10px;font-size:11px;" onclick="revisarDocumento(${d.id},'rechazado')">❌</button>
+                </div>
+              </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <h3>Enviar mensaje</h3>
+          <select id="tipo-msg-${id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:8px;">
+            <option value="info">Información</option>
+            <option value="advertencia">Advertencia</option>
+            <option value="exito">Éxito</option>
+            <option value="error">Error</option>
+          </select>
+          <textarea id="msg-texto-${id}" placeholder="Escribe tu mensaje..."
+            style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);resize:vertical;min-height:70px;margin-bottom:8px;"></textarea>
+          <button class="btn-primary" onclick="enviarMensaje(${id})">Enviar mensaje</button>
+          <span id="msg-ok-${id}" style="margin-left:8px;font-size:12px;color:#1A7A3F;"></span>
+        </div>`;
+
+    } catch { contenido.innerHTML = '<p style="color:var(--danger);">Error al cargar datos.</p>'; }
+  }
+
+  function cerrarPanel() {
+    document.getElementById('side-panel').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  async function cambiarEstatus(id) {
+    const estatus = document.getElementById(`sel-estatus-${id}`).value;
+    const observaciones_admin = document.getElementById(`obs-${id}`).value.trim();
+    try {
+      const res = await apiCambiarEstatusAspirante(id, { estatus, observaciones_admin });
+      if (res.id) { alert('Estatus actualizado'); cerrarPanel(); await cargarAspirantes(); }
+      else alert(res.message || 'Error');
+    } catch { alert('Error de conexión'); }
+  }
+
+  async function revisarDocumento(doc_id, estatus) {
+    const obs = estatus === 'rechazado'
+      ? prompt('Motivo de rechazo (opcional):') || ''
+      : '';
+    try {
+      await apiRevisarDocumento(doc_id, { estatus, observaciones: obs });
+      await cargarAspirantes();
+      // Recargar panel
+      const asp = todosAspirantes.find(a => a.id);
+      if (asp) verDetalle(asp.id);
+    } catch { alert('Error al revisar documento'); }
+  }
+
+  async function verDocumento(doc_id) {
+    try {
+      const res = await fetch(`${API_URL}/aspirantes/documentos/${doc_id}/descargar`, { headers: authHeaders() });
+      const data = await res.json();
+      if (data.contenido_b64) {
+        const w = window.open();
+        w.document.write(`<img src="${data.contenido_b64}" style="max-width:100%;">`);
+        if (data.mime_type === 'application/pdf') {
+          w.document.write(`<iframe src="${data.contenido_b64}" width="100%" height="100%" style="border:none;position:fixed;inset:0;"></iframe>`);
+        }
+      }
+    } catch { alert('Error al descargar documento'); }
+  }
+
+  async function enviarMensaje(id) {
+    const mensaje = document.getElementById(`msg-texto-${id}`).value.trim();
+    const tipo    = document.getElementById(`tipo-msg-${id}`).value;
+    if (!mensaje) return;
+    try {
+      await apiEnviarMensajeAspirante(id, { mensaje, tipo });
+      document.getElementById(`msg-texto-${id}`).value = '';
+      document.getElementById(`msg-ok-${id}`).textContent = '✓ Mensaje enviado';
+      setTimeout(() => { document.getElementById(`msg-ok-${id}`).textContent = ''; }, 2000);
+    } catch { alert('Error al enviar'); }
+  }
+
+  async function convertirAlumno(id) {
+    const grupo_id = document.getElementById(`sel-grupo-${id}`).value || null;
+    if (!confirm('¿Convertir este aspirante a alumno? Esta acción no se puede deshacer.')) return;
+    try {
+      const res = await apiConvertirAlumno(id, { grupo_id });
+      if (res.matricula) {
+        alert(`✅ Alumno creado exitosamente.\n\nMatrícula: ${res.matricula}\nNIP: ${res.nip}\nCorreo: ${res.correo_institucional}\nUsuario: ${res.usuario}\n\nGuarda estos datos.`);
+        cerrarPanel();
+        await cargarAspirantes();
+      } else {
+        alert(res.message || 'Error al convertir');
+      }
+    } catch { alert('Error de conexión'); }
+  }
+</script>
+</body>
+</html>

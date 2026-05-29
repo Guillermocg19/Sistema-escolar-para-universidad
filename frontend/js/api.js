@@ -107,13 +107,86 @@ async function apiRegistrarAspirante(datos) {
   });
   return r.json();
 }
-async function apiGetMiPerfilAspirante(usuario_id) { const r = await fetch(`${API_URL}/aspirantes/mi-perfil/${usuario_id}`, { headers: authHeaders() }); return r.json(); }
-async function apiGetDocumentosAspirante(aspirante_id) { const r = await fetch(`${API_URL}/aspirantes/documentos/${aspirante_id}`, { headers: authHeaders() }); return r.json(); }
-async function apiSubirDocumento(datos) { const r = await fetch(`${API_URL}/aspirantes/documentos`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(datos) }); return r.json(); }
-async function apiGetMensajesAspirante(aspirante_id) { const r = await fetch(`${API_URL}/aspirantes/mensajes/${aspirante_id}`, { headers: authHeaders() }); return r.json(); }
+async function apiGetMiPerfilAspirante(usuario_id) {
+  const r = await fetch(`${API_URL}/aspirantes/mi-perfil/${usuario_id}`, {
+    headers: authHeaders()
+
+  });
+  return r.json();
+}
+async function apiGetDocumentosAspirante(aspirante_id) {
+  const r = await fetch(`${API_URL}/aspirantes/documentos/${aspirante_id}`, {
+    headers: authHeaders()
+
+  });
+  return r.json();
+}
+async function apiSubirDocumento(datos) {
+  const r = await fetch(`${API_URL}/aspirantes/documentos`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+
+  });
+  return r.json();
+}
+async function apiGetMensajesAspirante(aspirante_id) {
+  const r = await fetch(`${API_URL}/aspirantes/mensajes/${aspirante_id}`, {
+    headers: authHeaders()
+
+  });
+  return r.json();
+}
 async function apiGetAspirantes() { const r = await fetch(`${API_URL}/aspirantes`, { headers: authHeaders() }); return r.json(); }
 async function apiGetAspirante(id) { const r = await fetch(`${API_URL}/aspirantes/${id}`, { headers: authHeaders() }); return r.json(); }
 async function apiCambiarEstatusAspirante(id, datos) { const r = await fetch(`${API_URL}/aspirantes/${id}/estatus`, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(datos) }); return r.json(); }
 async function apiRevisarDocumento(doc_id, datos) { const r = await fetch(`${API_URL}/aspirantes/documentos/${doc_id}/revisar`, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(datos) }); return r.json(); }
 async function apiEnviarMensajeAspirante(id, datos) { const r = await fetch(`${API_URL}/aspirantes/${id}/mensaje`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(datos) }); return r.json(); }
 async function apiConvertirAlumno(id, datos) { const r = await fetch(`${API_URL}/aspirantes/${id}/convertir-alumno`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(datos) }); return r.json(); }
+
+
+async function apiGetReticularAlumnoNuevo(usuario_id) {
+  const r = await fetch(`${API_URL}/reticular/alumno/${usuario_id}`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiGetMapaCarrera(carrera_id) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiGetMateriasMapaCarrera(carrera_id) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/materias`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiAsignarMateriaACarrera(carrera_id, datos) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/materias`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiQuitarMateriaDeCarrera(carrera_id, cm_id) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/materias/${cm_id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return r.json();
+}
+
+async function apiGetPrerequisitosCarrera(carrera_id) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/prerequisitos`, { headers: authHeaders() });
+  return r.json();
+}
+
+async function apiAgregarPrerequisito(carrera_id, datos) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/prerequisitos`, {
+    method: 'POST', headers: authHeaders(), body: JSON.stringify(datos)
+  });
+  return r.json();
+}
+
+async function apiEliminarPrerequisito(carrera_id, prereq_id) {
+  const r = await fetch(`${API_URL}/reticular/carrera/${carrera_id}/prerequisitos/${prereq_id}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+  return r.json();
+}

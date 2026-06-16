@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Mapa Curricular</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/gestion.css">
+  <style>
+    .layout-ret { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+    .carrera-btn {
+      width: 100%; text-align: left; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      background: var(--input-bg); cursor: pointer; font-family: var(--font);
+      font-size: 13px; color: var(--text); margin-bottom: 6px; transition: all .15s;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .carrera-btn:hover { border-color: var(--blue); background: var(--blue-light); }
+    .carrera-btn.active { border-color: var(--blue); background: var(--blue-light); font-weight: 700; }
+    .semestre-section { margin-bottom: 20px; }
+    .semestre-header-adm {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; font-weight: 700; color: var(--text-sub);
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 6px 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .mat-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 10px; border-radius: 7px; margin-bottom: 4px;
+      background: white; border: 1px solid var(--border); font-size: 13px;
+    }
+    .mat-row:hover { background: #FAFCFF; }
+    .mat-info-ret .clave { font-size: 10px; color: var(--text-sub); }
+    .mat-info-ret .nombre { font-weight: 600; color: var(--text); }
+    .form-inline {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+      background: var(--blue-light); padding: 12px; border-radius: 8px; margin-bottom: 12px;
+    }
+    .form-inline select, .form-inline input {
+      height: 36px; padding: 0 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; font-family: var(--font);
+      background: white; color: var(--text); outline: none;
+    }
+    .form-inline select:focus, .form-inline input:focus { border-color: var(--blue); }
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+    .tab-btn { padding: 10px 18px; border: none; background: transparent; font-size: 13px; font-weight: 600;
+      font-family: var(--font); color: var(--text-sub); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .prereq-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 7px;
+      margin-bottom: 6px; font-size: 13px; background: white;
+    }
+    .arrow-label { font-size: 11px; color: var(--text-sub); margin: 0 8px; }
+    .empty-state { text-align: center; color: var(--text-sub); padding: 32px 0; font-size: 13px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; font-family: var(--font);
+      z-index: 9999; opacity: 0; transition: opacity .2s; }
+    .toast.show { opacity: 1; }
+    .toast.ok  { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .toast.err { background: #FEF0F0; color: var(--danger); border: 1px solid #FBD5D5; }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <h2 id="navbar-titulo">Mapa Curricular</h2>
+    <span id="navbar-rol" class="rol-badge"></span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" id="navbar-usuario"></span>
+    <a href="dashboard-administrativo.html" style="color:white;font-size:13px;text-decoration:none;opacity:.9;">← Panel</a>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="layout-ret">
+    <!-- Lista de carreras -->
+    <div class="card" style="margin-bottom:0;">
+      <h3>Carreras</h3>
+      <div id="lista-carreras"><p style="color:var(--text-sub);font-size:13px;">Cargando...</p></div>
+    </div>
+
+    <div class="card" style="margin-bottom:0;" id="panel-derecho">
+      <div class="empty-state">Selecciona una carrera para gestionar su mapa curricular.</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/gestion-reticular.js"></script>
+</body>
+</html>
